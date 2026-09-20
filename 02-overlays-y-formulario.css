@@ -1,0 +1,354 @@
+/* TrenTurnos v5 — Overlays/hojas, selector de tipo, formulario de turno, teclado de hora. Separado del <style> único original (orden de carga = orden del cascade, ver index.html). */
+/* ── OVERLAY (SingleChildScrollView equivalent) ── */
+.ov{display:none;position:absolute;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:flex-end;backdrop-filter:blur(5px)}
+.ov.on{display:flex}
+/* DH popup siempre encima de todo — posición fija, z-index máximo */
+#ov-dh{position:fixed;z-index:9999}
+#ov-dh-cont{position:fixed;z-index:9999}
+/* Sheet: flex column, max 82% height, inner body scrolls */
+.sh{background:var(--s1);border-radius:24px 24px 0 0;width:100%;
+    max-height:82%;display:flex;flex-direction:column;overflow:hidden;
+    animation:sup .26s cubic-bezier(.32,.72,0,1)}
+@keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.sh-handle{width:34px;height:3px;background:var(--div);border-radius:2px;margin:9px auto 0;flex-shrink:0}
+
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — Estilo "billete de tren" para el popup de Novedades
+   (maqueta aprobada por Alex, versión oscura). Clases con prefijo
+   nov2- para no tocar nada del resto de overlays (.sh/.sh-hdr etc.
+   siguen intactos, esto solo se usa DENTRO de #ov-novedades).
+═══════════════════════════════════════════════════════════ */
+.nov2-head{padding:20px 22px 14px}
+.nov2-brand{font-size:9px;letter-spacing:2.5px;color:var(--nar2);font-weight:800;text-transform:uppercase}
+.nov2-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--tx);margin-top:5px;line-height:1}
+.nov2-route{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:10.5px;color:var(--tx3);font-weight:700;letter-spacing:.4px}
+.nov2-dot{width:4px;height:4px;border-radius:50%;background:var(--nar2);flex-shrink:0}
+.nov2-ln{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--tx3) 0 4px,transparent 4px 8px);opacity:.4}
+.nov2-perf{position:relative;height:20px;flex-shrink:0}
+.nov2-perf::before,.nov2-perf::after{content:'';position:absolute;top:-2px;width:20px;height:20px;background:var(--bg);border-radius:50%}
+.nov2-perf::before{left:-10px}
+.nov2-perf::after{right:-10px}
+.nov2-perf-line{position:absolute;left:22px;right:22px;top:9px;border-top:2px dashed var(--div)}
+.nov2-stub{display:grid;grid-template-columns:38px 1fr;gap:13px;padding:14px 0;border-bottom:1px solid var(--div)}
+.nov2-stub:last-child{border-bottom:none}
+.nov2-stub-ico{width:38px;height:38px;border-radius:10px;background:rgba(249,115,22,.12);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.nov2-stub-title{font-weight:800;font-size:13px;color:var(--tx);margin-bottom:4px;letter-spacing:.1px}
+.nov2-stub-desc{font-size:11.5px;color:var(--tx3);line-height:1.55}
+.nov2-btn{width:100%;padding:15px;background:var(--nar2);border:none;border-radius:10px;color:#1a1006;font-weight:800;font-size:13.5px;letter-spacing:.3px;cursor:pointer}
+.nov2-barcode{margin-top:13px;height:22px;background:repeating-linear-gradient(90deg,var(--tx3) 0 2px,transparent 2px 5px);opacity:.4}
+
+.sh-hdr{padding:10px 16px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--div);flex-shrink:0}
+.sh-ico{font-size:20px}
+.sh-tit{flex:1;font-size:14px;font-weight:800}
+.sh-sub{font-size:10px;color:var(--tx2);margin-top:1px}
+.sh-close{background:none;border:none;color:var(--tx2);font-size:18px;cursor:pointer;padding:3px}
+/* form-body: fills space, scrolls internally */
+/* U-01 FIX: explicit height:0 on flex child forces correct overflow-y:auto behavior
+   on all screen sizes. Without it, content overflows the 82% max-height on small phones. */
+#form-body{flex:1;min-height:0;height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#form-body::-webkit-scrollbar{display:none}
+.mfoot{padding:10px 14px 20px;border-top:1px solid var(--div);display:flex;gap:7px;flex-shrink:0;background:var(--s1)}
+.m-del{height:42px;padding:0 13px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;color:#FCA5A5;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.m-save{flex:1;height:42px;background:var(--acc);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;transition:background .18s}
+.m-save:hover{background:var(--acc2)}
+
+/* ── TIPO SELECTOR ── */
+.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 13px}
+.topt{border:1px solid var(--div);background:var(--s2);border-radius:12px;padding:12px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .18s}
+.to-ico{font-size:22px}
+.to-lbl{font-size:11px;font-weight:800;text-align:center}
+.to-sub{font-size:9px;text-align:center;line-height:1.3;opacity:.55}
+.topt.t-ord:hover{border-color:var(--c-ord);background:rgba(59,127,255,.1);color:#93C5FD}
+.topt.t-res:hover{border-color:var(--c-res);background:rgba(245,158,11,.1);color:#FCD34D}
+.topt.t-des:hover{border-color:var(--c-des);background:rgba(34,197,94,.1);color:#86EFAC}
+.topt.t-baj:hover{border-color:var(--c-baj);background:rgba(239,68,68,.1);color:#FCA5A5}
+.topt.t-dop:hover{border-color:var(--c-dop);background:rgba(219,39,119,.1);color:#F9A8D4}
+.topt.t-art:hover{border-color:var(--acc);background:rgba(59,127,255,.1);color:var(--acc)}
+
+/* ── FORMULARIO ── */
+.fsec{padding:8px 13px}
+.fsec-lbl{font-size:8px;font-weight:800;letter-spacing:1.2px;color:var(--tx3);margin-bottom:6px;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.fsec-lbl::after{content:'';flex:1;height:1px;background:var(--div)}
+.linea-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.lchip{padding:4px 10px;border-radius:16px;border:1px solid var(--div);background:var(--s2);font-size:10px;font-weight:600;color:var(--tx2);cursor:pointer;transition:all .16s}
+.lchip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+/* Selector fields — altura fija, nunca se expande */
+.sf{background:var(--s2);border-radius:9px;border:1px solid var(--div);
+    padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;
+    transition:border-color .16s;margin-bottom:5px;flex-shrink:0;
+    height:48px;min-height:48px;max-height:48px;overflow:hidden}
+.sf:hover{border-color:var(--acc2)}
+.sf.fil{border-color:rgba(59,127,255,.45)}
+.sf-i{font-size:13px;color:var(--acc2);flex-shrink:0}
+.sf-b{flex:1;min-width:0;overflow:hidden}
+.sf-lbl{font-size:8px;color:var(--tx3);letter-spacing:.4px;font-weight:700;white-space:nowrap}
+.sf-val{font-size:12px;font-weight:600;color:var(--tx);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.sf-val.ph{color:var(--tx3);font-weight:400;font-size:11px}
+.sf-val.hv{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.sf-base{font-size:8px;color:var(--acc2);font-weight:700;margin-top:1px;white-space:nowrap}
+.sf-arr{color:var(--tx3);font-size:12px;flex-shrink:0}
+.hora-row{display:flex;gap:6px;margin-bottom:5px}
+.hora-row .sf{flex:1;margin-bottom:0}
+.dur-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(59,127,255,.07);border:1px solid rgba(59,127,255,.18);border-radius:7px;padding:3px 9px;font-size:10px;font-weight:700;color:var(--acc2);margin-bottom:7px}
+/* Descanso buttons */
+.da-btn{border:1px solid var(--div);background:var(--s2);border-radius:10px;padding:11px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .16s}
+.da-ico{font-size:20px}
+.da-lbl{font-size:11px;font-weight:800;text-align:center;line-height:1.2}
+.da-sub{font-size:9px;text-align:center;color:var(--tx2);line-height:1.3}
+.da-btn.w-verde:hover,.da-btn.w-verde.on{border-color:var(--green);background:rgba(34,197,94,.1);color:#86EFAC}
+.da-btn.w-amber:hover,.da-btn.w-amber.on{border-color:var(--amber);background:rgba(245,158,11,.1);color:#FCD34D}
+.da-btn.w-violet:hover,.da-btn.w-violet.on{border-color:var(--violet);background:rgba(139,92,246,.1);color:#C4B5FD}
+/* Comp choice */
+.cc-btn{flex:1;border:1px solid var(--div);background:var(--s2);border-radius:9px;padding:9px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .16s;color:var(--tx2)}
+.cc-btn .cci{font-size:16px}
+.cc-btn .ccl{font-size:10px;font-weight:700;text-align:center}
+.cc-btn .ccs{font-size:8px;text-align:center}
+.cc-btn.on{border-color:var(--acc2);background:rgba(59,127,255,.1);color:var(--acc2)}
+/* Resultado */
+.calc-result{margin:0 0 8px;background:rgba(59,127,255,.06);border:1px solid rgba(59,127,255,.2);border-radius:10px;padding:11px 12px}
+.cr-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.cr-l{color:var(--tx2)}
+.cr-v{font-weight:700}
+.cr-div{height:1px;background:var(--div);margin:7px 0}
+.cr-total{display:flex;justify-content:space-between;align-items:center}
+.cr-tl{font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+.cr-tv{font-size:22px;font-weight:900;color:var(--acc2);font-variant-numeric:tabular-nums}
+/* Notas */
+.notas-wrap{margin:0 13px 10px}
+.notas-inp{width:100%;background:var(--s2);border:1px solid var(--div);border-radius:9px;color:var(--tx);font-size:12px;padding:8px 11px;resize:none;outline:none;transition:border-color .18s}
+.notas-inp:focus{border-color:var(--acc2)}
+.notas-inp::placeholder{color:var(--tx3)}
+/* mini-cal */
+.mini-cal-wrap{margin:0 0 9px;background:var(--s2);border-radius:10px;padding:10px;border:1px solid var(--div)}
+.mc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.mc-mes{font-size:12px;font-weight:800}
+.mc-nav{background:none;border:none;color:var(--tx2);font-size:16px;cursor:pointer;padding:1px 5px;border-radius:5px}
+.mc-dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.mc-dh{text-align:center;font-size:8px;color:var(--tx3);font-weight:700}
+.mc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.mc-d{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;cursor:pointer;border:1px solid transparent;color:var(--tx2);transition:all .14s}
+.mc-d:hover:not(.mc-dis){border-color:var(--cyan);background:rgba(6,182,212,.1)}
+.mc-d.mc-sel{background:rgba(6,182,212,.22);border-color:var(--cyan);color:#67E8F9;font-weight:800}
+.mc-d.mc-dis{opacity:.2;pointer-events:none}
+/* NUEVO — clase pedida explícitamente para los días ya ocupados en
+   los selectores de Art.51, Art.52 y HTDL. Va siempre junto a
+   .mc-dis (ver renderMiniCal), así que estas propiedades son
+   redundantes a propósito: garantizan el bloqueo aunque en el futuro
+   solo se aplicara esta clase. */
+.mc-d.bloqueado{opacity:.2;pointer-events:none;cursor:not-allowed}
+.mc-count{font-size:9px;color:var(--tx2);text-align:center;margin-top:6px}
+.mc-count span{color:var(--cyan2);font-weight:700}
+/* ibox */
+.ibox{border-radius:10px;padding:10px 12px;display:flex;gap:8px;font-size:11px;margin-bottom:8px;line-height:1.45}
+.ibox.blue{background:rgba(59,127,255,.08);border:1px solid rgba(59,127,255,.22)}
+.ibox.green{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.22)}
+.ibox.amber{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.22)}
+.ibox.red{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22)}
+.ibox-i{font-size:16px;flex-shrink:0}
+/* Tramo header badge */
+.tramo-hdr{display:flex;align-items:center;gap:5px;margin-bottom:5px;padding:4px 8px;border-radius:7px}
+/* ── ALERTA DESCANSO / RETRASO ── */
+/* Badge de alerta en tarjeta del día */
+.alerta-descanso{display:flex;align-items:center;gap:7px;padding:7px 11px;
+                 background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.3);
+                 border-radius:9px;margin-bottom:7px;font-size:11px;color:var(--red2);
+                 font-weight:600;animation:pulseRed 2s infinite}
+@keyframes pulseRed{0%,100%{border-color:rgba(220,38,38,.3)}50%{border-color:rgba(220,38,38,.7)}}
+.alerta-ico{font-size:16px;flex-shrink:0}
+/* NUEVO — botón de correo dentro de la alerta de descanso (retraso en tren de ida) */
+.alerta-mail-btn{display:flex;align-items:center;justify-content:center;
+  width:26px;height:26px;flex-shrink:0;align-self:flex-start;
+  border-radius:7px;background:var(--s2);border:1px solid var(--div);
+  color:var(--acc3);text-decoration:none;font-size:13px;transition:all .18s;
+  cursor:pointer;font-family:'Inter',sans-serif;outline:none}
+.alerta-mail-btn:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
+
+/* NUEVO — Modal intermedio de confirmación de correo (capa UX) */
+.correo-modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.62);
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.correo-modal-box{background:var(--s1);border:1px solid var(--div);border-radius:18px;
+  width:min(360px,100%);max-height:88vh;overflow-y:auto;box-shadow:var(--sh-card);
+  padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px}
+.correo-modal-hdr{display:flex;align-items:center;gap:8px}
+.correo-modal-ico{font-size:18px;flex-shrink:0}
+.correo-modal-title{font-size:14px;font-weight:800;color:var(--tx)}
+.correo-modal-sub{font-size:10px;color:var(--tx2);margin-top:1px}
+.correo-modal-textarea{width:100%;min-height:220px;resize:vertical;background:var(--s2);
+  border:1px solid var(--div);border-radius:10px;color:var(--tx);font-size:12px;
+  line-height:1.5;padding:10px;outline:none;font-family:'Inter',sans-serif}
+.correo-modal-textarea:focus{border-color:var(--acc)}
+.correo-modal-btns{display:flex;gap:8px;margin-top:2px}
+.correo-modal-btn{flex:1;padding:9px;border-radius:10px;font-size:12px;font-weight:800;
+  cursor:pointer;border:1px solid var(--div);transition:all .18s}
+.correo-modal-btn-cancel{background:var(--s2);color:var(--tx2)}
+.correo-modal-btn-cancel:hover{background:var(--s3);color:var(--tx)}
+.correo-modal-btn-send{background:var(--acc);color:#fff;border-color:var(--acc);box-shadow:var(--sh-btn)}
+.correo-modal-btn-send:hover{background:var(--acc2)}
+/* Icono rojo sutil en celda del calendario */
+.dc-alerta::after{content:'⚠';position:absolute;top:1px;right:1px;font-size:7px;
+                  color:var(--red2);line-height:1}
+/* NUEVO — Badge de "turno pisado por baja" en la celda del calendario */
+.dc-baja-pisada::after{content:'🏥';position:absolute;bottom:1px;right:1px;font-size:7px;line-height:1}
+/* NUEVO — Badge de Reserva Art.51/52 pendiente de pinchar/verificar */
+.dc-art5152-reserva-pendiente::after{content:'⏳';position:absolute;bottom:1px;right:1px;font-size:7px;line-height:1}
+/* Input de retraso inline */
+.retraso-wrap{display:flex;align-items:center;gap:7px;padding:8px 11px;
+              background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);
+              border-radius:9px;margin-top:6px}
+.retraso-inp{background:var(--s2);border:1px solid var(--div);border-radius:7px;
+             color:var(--amber2);font-size:16px;font-weight:800;padding:4px 9px;
+             width:72px;text-align:center;outline:none;-moz-appearance:textfield;
+             font-variant-numeric:tabular-nums}
+.retraso-inp::-webkit-inner-spin-button{-webkit-appearance:none}
+.retraso-inp:focus{border-color:var(--amber2)}
+.ov-top{z-index:400!important}
+/* Pop-up 1 "en standby": sigue montado y con sus datos intactos,
+   solo se atenúa visualmente y se bloquea su interacción mientras
+   el Pop-up 2 (.ov-top) está abierto encima. */
+.ov.standby .sh{opacity:.35;pointer-events:none;filter:saturate(.4)}
+/* Campo numTren vuelta */
+.numtren-vuelta-wrap{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);
+                     border-radius:10px;padding:9px 12px;margin-bottom:10px;
+                     display:flex;align-items:center;gap:8px}
+.agenda-sh{background:var(--s1);border-radius:24px 24px 0 0;width:100%;
+           max-height:78%;display:flex;flex-direction:column;
+           animation:sup .23s cubic-bezier(.32,.72,0,1)}
+.agenda-srch{background:var(--s2);border-radius:10px;padding:8px 12px;
+             display:flex;align-items:center;gap:7px;border:1px solid var(--div);
+             margin:10px 14px 6px}
+.agenda-srch input{background:none;border:none;color:var(--tx);font-size:13px;
+                   outline:none;flex:1}
+.agenda-srch input::placeholder{color:var(--tx3)}
+.agenda-list{flex:1;overflow-y:auto;padding:4px 12px 16px;scrollbar-width:thin}
+/* Tarjeta de contacto */
+.contacto-card{display:flex;align-items:center;gap:10px;padding:11px 13px;
+               background:var(--s2);border-radius:12px;border:1px solid var(--div);
+               margin-bottom:7px;cursor:pointer;transition:all .15s;user-select:none}
+.contacto-card:active{transform:scale(.97)}
+.contacto-card:hover{border-color:var(--acc2)}
+.contacto-av{width:38px;height:38px;border-radius:12px;background:rgba(37,99,235,.15);
+             display:flex;align-items:center;justify-content:center;
+             font-size:17px;font-weight:800;color:var(--acc2);flex-shrink:0;
+             border:1px solid rgba(37,99,235,.25)}
+.contacto-info{flex:1;min-width:0}
+.contacto-nombre{font-size:13px;font-weight:700;color:var(--tx);
+                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contacto-mat{font-size:10px;color:var(--tx3);margin-top:1px}
+.contacto-tren{font-size:10px;color:var(--nar2);font-weight:700;margin-top:1px}
+.contacto-del{background:none;border:none;color:var(--tx3);font-size:16px;
+              cursor:pointer;padding:4px;border-radius:6px;flex-shrink:0;
+              transition:color .15s}
+.contacto-del:active{color:var(--red2)}
+/* Sugerencias autocompletado */
+.sug-box{position:absolute;left:0;right:0;background:var(--s1);
+         border:1px solid var(--div);border-radius:11px;z-index:50;
+         box-shadow:0 8px 24px rgba(0,0,0,.4);overflow:hidden;
+         max-height:180px;overflow-y:auto}
+.sug-item{padding:10px 13px;font-size:12px;cursor:pointer;
+          display:flex;align-items:center;gap:8px;transition:background .13s}
+.sug-item:hover,.sug-item:active{background:var(--s2)}
+.sug-nombre{font-weight:700;color:var(--tx)}
+.sug-mat{color:var(--tx3);font-size:10px;margin-left:auto}
+.est-sh{background:var(--s1);border-radius:24px 24px 0 0;width:100%;
+        height:76%;display:flex;flex-direction:column;
+        animation:sup .23s cubic-bezier(.32,.72,0,1)}
+.est-hdr{padding:12px 16px 10px;border-bottom:1px solid var(--div);flex-shrink:0}
+.est-tit{font-size:15px;font-weight:800;margin-bottom:8px;
+         display:flex;align-items:center;gap:7px}
+.est-srch{background:var(--s2);border-radius:10px;padding:8px 12px;
+          display:flex;align-items:center;gap:7px;border:1px solid var(--div);
+          transition:border-color .18s}
+.est-srch:focus-within{border-color:var(--acc2)}
+.est-srch input{background:none;border:none;color:var(--tx);font-size:13px;
+                outline:none;flex:1}
+.est-srch input::placeholder{color:var(--tx3)}
+.est-list{flex:1;overflow-y:auto;padding:8px 12px 16px;
+          scrollbar-width:thin;scrollbar-color:var(--div) transparent}
+.est-grp-hdr{padding:10px 4px 6px;font-size:9px;font-weight:800;
+             letter-spacing:1.2px;color:var(--tx3);text-transform:uppercase;
+             display:flex;align-items:center;gap:6px;position:sticky;top:0;
+             background:var(--s1);z-index:1}
+.est-grp-hdr::after{content:'';flex:1;height:1px;background:var(--div)}
+
+/* Card de estación — el corazón del nuevo diseño */
+.est-card{display:flex;align-items:center;gap:10px;padding:11px 13px;
+          background:var(--s2);border-radius:12px;border:1.5px solid var(--div);
+          cursor:pointer;transition:all .15s;margin-bottom:6px;user-select:none}
+.est-card:active{transform:scale(.97)}
+.est-card.sel{background:rgba(37,99,235,.12);border-color:var(--acc2);
+              box-shadow:0 0 0 2px rgba(37,99,235,.18)}
+/* Icono de tren dentro de la card */
+.est-card-ico{width:34px;height:34px;border-radius:9px;display:flex;
+              align-items:center;justify-content:center;font-size:16px;
+              flex-shrink:0;background:rgba(37,99,235,.1)}
+.est-card.sel .est-card-ico{background:rgba(37,99,235,.2)}
+/* Estación internacional — card dorada */
+.est-card.intl{border-color:rgba(249,115,22,.35);
+               background:rgba(249,115,22,.06)}
+.est-card.intl .est-card-ico{background:rgba(249,115,22,.15)}
+.est-card.intl.sel{border-color:var(--nar);background:rgba(249,115,22,.14);
+                   box-shadow:0 0 0 2px rgba(249,115,22,.22)}
+.est-card-info{flex:1;min-width:0}
+.est-card-name{font-size:13px;font-weight:600;color:var(--tx);
+               overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.est-card.sel .est-card-name{font-weight:800;color:var(--acc3)}
+.est-card.intl .est-card-name{color:var(--nar3)}
+.est-card.intl.sel .est-card-name{color:var(--nar2);font-weight:800}
+.est-card-badge{font-size:8px;font-weight:700;color:var(--nar2);
+                background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);
+                border-radius:5px;padding:1px 5px;margin-top:2px;display:inline-block}
+.est-card-check{font-size:16px;color:var(--acc2);flex-shrink:0}
+.est-card.intl .est-card-check{color:var(--nar2)}
+/* Badge Plus Internacional auto */
+.plus-intl-badge{display:flex;align-items:center;gap:6px;padding:7px 11px;
+                 background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);
+                 border-radius:9px;font-size:11px;font-weight:700;color:var(--nar2);
+                 margin:0 13px 10px;animation:fadeIn .25s ease}
+/* HORA SHEET — teclado numérico táctil */
+.hora-sh{background:var(--s1);border-radius:24px 24px 0 0;width:100%;
+         padding:0 16px 22px;animation:sup .23s cubic-bezier(.32,.72,0,1);
+         display:flex;flex-direction:column;align-items:center}
+.hora-title{font-size:14px;font-weight:800;padding:11px 0 6px;
+            letter-spacing:-.3px;align-self:flex-start}
+
+/* Display grande de horas */
+.hora-display{display:flex;align-items:center;justify-content:center;
+              gap:4px;margin:6px 0 4px;width:100%}
+.hora-seg{font-size:52px;font-weight:900;font-variant-numeric:tabular-nums;
+          letter-spacing:-2px;color:var(--tx3);cursor:pointer;
+          background:var(--s2);border-radius:14px;padding:6px 20px;
+          border:2px solid var(--div);min-width:100px;text-align:center;
+          transition:all .15s;user-select:none}
+.hora-seg.activo{color:var(--tx);border-color:var(--acc2);
+                 background:rgba(59,127,255,.1);
+                 box-shadow:0 0 0 3px rgba(59,127,255,.15)}
+.hora-sep{font-size:44px;font-weight:900;color:var(--tx3);padding-bottom:4px}
+.hora-cursor-lbl{font-size:10px;color:var(--acc2);font-weight:700;
+                 letter-spacing:.5px;margin-bottom:12px;height:14px}
+
+/* Teclado numérico */
+.hora-pad{width:100%;display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.hp-row{display:flex;gap:7px;justify-content:center}
+.hp-btn{flex:1;height:54px;border:none;border-radius:13px;
+        background:var(--s2);color:var(--tx);font-size:22px;font-weight:700;
+        cursor:pointer;transition:all .12s;border:1px solid var(--div);
+        -webkit-tap-highlight-color:transparent;user-select:none}
+.hp-btn:active{background:rgba(59,127,255,.18);border-color:var(--acc2);
+               transform:scale(.94)}
+.hp-alt{background:var(--s3);color:var(--tx2);font-size:18px}
+.hp-alt:active{background:rgba(59,127,255,.12)}
+
+/* Botón confirmar */
+.hora-conf{width:100%;height:46px;background:var(--acc);border:none;
+           border-radius:12px;color:#fff;font-size:14px;font-weight:800;
+           cursor:pointer;box-shadow:0 4px 14px rgba(59,127,255,.4);
+           letter-spacing:-.2px}
+/* Confirm sheet */
+.confirm-sh{background:var(--s1);border-radius:24px 24px 0 0;width:100%;padding:18px;animation:sup .23s cubic-bezier(.32,.72,0,1)}
+.conf-ico{font-size:38px;text-align:center;margin-bottom:8px}
+.conf-tit{font-size:16px;font-weight:800;text-align:center;margin-bottom:5px}
+.conf-txt{font-size:11px;color:var(--tx2);text-align:center;line-height:1.5;margin-bottom:18px}
+.conf-btns{display:flex;gap:7px}
+.conf-cancel{flex:1;height:42px;background:var(--s2);border:1px solid var(--div);border-radius:10px;color:var(--tx);font-size:13px;font-weight:700;cursor:pointer}
+.conf-del{flex:1;height:42px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.35);border-radius:10px;color:#FCA5A5;font-size:13px;font-weight:800;cursor:pointer}

@@ -1,0 +1,151 @@
+/* TrenTurnos v5 — Pop-up simplificado y estilos DH. Separado del <style> único original (orden de carga = orden del cascade, ver index.html). */
+/* ═══════════════════════════════════════════════════════════
+   POP-UP SIMPLIFICADO — Vista Resumida (bloques de tren)
+   Solo estilos nuevos y aditivos. No modifica .tr-r, .ibox,
+   ni ninguna clase usada por el acordeón/historial, que
+   conserva el detalle completo intacto.
+═══════════════════════════════════════════════════════════ */
+.tv-badges-row{
+  display:flex;
+  gap:6px;
+  margin-bottom:12px;
+}
+.tv-badge-mini{
+  font-size:14px;
+  line-height:1;
+  background:var(--s2);
+  border:1px solid var(--div);
+  border-radius:7px;
+  padding:4px 8px;
+}
+.tv-block{
+  background:var(--s2);
+  border:1px solid var(--div);
+  border-radius:12px;
+  padding:14px 16px;
+  margin:0 0 10px;
+}
+.tv-block.ida{border-left:3px solid var(--c-ord)}
+.tv-block.vuelta{border-left:3px solid var(--amber2)}
+.tv-block-tag{
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  color:var(--tx3);
+  margin-bottom:8px;
+}
+.tv-num{
+  font-size:19px;
+  font-weight:900;
+  color:var(--tx);
+  letter-spacing:.2px;
+  margin-bottom:8px;
+  font-variant-numeric:tabular-nums;
+  line-height:1.2;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  white-space:normal;
+}
+.tv-route{
+  font-size:14px;
+  font-weight:600;
+  color:var(--tx2);
+  margin-bottom:6px;
+  line-height:1.4;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  white-space:normal;
+}
+.tv-hours{
+  font-size:13px;
+  font-weight:700;
+  color:var(--acc3);
+  font-variant-numeric:tabular-nums;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  white-space:normal;
+}
+
+/* ── DH: número de tren partido (12345-DH / 12345) ── */
+.tv-num-row{
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+.tv-num-part{
+  font-size:18px;
+  font-weight:900;
+  color:var(--tx);
+  font-variant-numeric:tabular-nums;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  white-space:normal;
+  line-height:1.2;
+}
+.tv-num-part.tv-num-dh{
+  color:var(--amber2);
+  position:relative;
+  padding-right:4px;
+}
+.tv-num-sep{
+  font-size:14px;
+  font-weight:400;
+  color:var(--tx3);
+}
+
+/* ── DH: etiqueta de estado del tramo ── */
+.tv-dh-tag{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-bottom:10px;
+  flex-wrap:wrap;
+}
+.tv-dh-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  background:rgba(245,158,11,.18);
+  border:1.5px solid var(--amber2);
+  border-radius:8px;
+  padding:4px 10px;
+  font-size:11px;
+  font-weight:800;
+  color:var(--amber2);
+  letter-spacing:.3px;
+  flex-shrink:0;
+}
+.tv-dh-detail{
+  font-size:11px;
+  font-weight:600;
+  color:var(--tx2);
+  line-height:1.3;
+}
+
+/* ── DH: borde especial en el bloque ── */
+.tv-block.tv-block-dh{
+  border-color:rgba(245,158,11,.35);
+  background:linear-gradient(135deg,var(--s2),rgba(245,158,11,.04));
+}
+
+/* ── Indicador de día dentro de pernocta ── */
+.tv-pernocta-dia{
+  margin-bottom:10px;
+}
+.tv-pernocta-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  background:rgba(217,119,6,.12);
+  border:1px solid rgba(217,119,6,.35);
+  border-radius:8px;
+  padding:5px 12px;
+  font-size:11px;
+  font-weight:800;
+  color:var(--amber2);
+  letter-spacing:.3px;
+}
+

@@ -1,0 +1,329 @@
+/* TrenTurnos v5 — Variables, layout responsive, cabecera, calendario, tarjeta del día y barra inferior. Separado del <style> único original (orden de carga = orden del cascade, ver index.html). */
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:'Inter',sans-serif}
+:root{
+  /* ── Nueva paleta: Azul profesional + naranja de acento ── */
+  --bg:#07111F;         /* fondo principal muy oscuro */
+  --s1:#0D1B2E;         /* superficie card */
+  --s2:#132236;         /* superficie elevada */
+  --s3:#1A2D44;         /* superficie más elevada */
+  --div:#1E3350;        /* separadores */
+
+  /* Azul primario */
+  --acc:#2563EB;        /* azul profesional */
+  --acc2:#3B82F6;       /* azul medio */
+  --acc3:#93C5FD;       /* azul claro */
+
+  /* Naranja — acento y avisos */
+  --nar:#F97316;        /* naranja vibrante */
+  --nar2:#FB923C;       /* naranja medio */
+  --nar3:#FED7AA;       /* naranja claro */
+
+  /* Semáforo */
+  --green:#16A34A;--green2:#4ADE80;
+  --amber:#D97706;--amber2:#FCD34D;
+  --red:#DC2626;--red2:#FCA5A5;
+  --violet:#7C3AED;--violet2:#C4B5FD;
+  --cyan:#0891B2;--cyan2:#67E8F9;
+
+  /* Texto */
+  --tx:#F8FAFC;--tx2:#94A3B8;--tx3:#475569;
+
+  /* Colores por tipo de turno */
+  --c-ord:#2563EB;  /* azul */
+  --c-res:#D97706;  /* ámbar */
+  --c-des:#16A34A;  /* verde */
+  --c-baj:#DC2626;  /* rojo */
+  --c-tra:#7C3AED;  /* violeta */
+  --c-vac:#0ea5e9;--c-cmp:#0891B2;  /* cyan */
+  --c-dop:#db2777;  /* rosa — DOP */
+
+  /* Sombras */
+  --sh-card:0 4px 24px rgba(0,0,0,.45);
+  --sh-btn: 0 4px 16px rgba(37,99,235,.45);
+  --sh-nar: 0 4px 16px rgba(249,115,22,.4);
+}
+
+/* NUEVO — MODO ADMINISTRADOR: mientras la sesión de admin esté activa,
+   se recolorea el acento principal de TODA la app (botones, cabeceras,
+   estados activos...) a un tono rojo de aviso, para que sea imposible
+   olvidar que se está en este modo. Se activa/desactiva junto con el
+   login/logout de admin — ver cerrarSesionAdmin() y
+   cargarPerfilYVerificarAdmin(). Solo cambia colores, no toca ninguna
+   estructura ni funcionalidad. */
+body.modo-admin{
+  --acc:#DC2626;
+  --acc2:#EF4444;
+  --acc3:#FCA5A5;
+}
+/* NUEVO — MODO INTERVENTOR: igual mecanismo que modo-admin, pero en
+   violeta, para que se note a simple vista que no es ni tripulante
+   (azul) ni administrador (rojo). Se activa desde el Portal de
+   Perfil (primera pantalla de la app) — ver elegirPerfilPortal(). */
+body.modo-interventor{
+  --acc:#7C3AED;
+  --acc2:#A78BFA;
+  --acc3:#DDD6FE;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);display:flex;flex-direction:column;align-items:center;min-height:100vh;min-height:100dvh}
+
+/* ── RESPONSIVE — Confirmado por el usuario: la app entra tanto desde
+   el móvil como desde el PC, y tiene que funcionar bien en las dos.
+   Antes, .ph tenía un ancho fijo de 390px con esquinas redondeadas
+   simulando un teléfono — en el móvil eso ya ES la pantalla entera
+   (bien), pero en un ordenador quedaba una cajita pequeña flotando en
+   medio de mucho espacio vacío (mal). Se probó también quitar el
+   límite del todo (estirar a pantalla completa) — pero eso rompía
+   más de 50 ventanas emergentes (.sh, .confirm-sh, etc.) que usan
+   "100% de ancho": sin límite arriba, esas ventanas se estiraban de
+   punta a punta de un monitor grande.
+   Solución: .ph mide el 100% del ancho disponible SIEMPRE, pero con
+   un tope de 480px. En el móvil (pantallas más estrechas que eso) no
+   cambia nada — sigue ocupando toda la pantalla, igual que hasta
+   ahora. En el PC, se queda centrada con un ancho cómodo de lectura,
+   ni diminuta ni estirada — y como las 50+ ventanas emergentes miden
+   "100%" relativo a ESTE contenedor, quedan arregladas solas, sin
+   tocar ni una de ellas por separado. */
+.ph{width:100%;max-width:480px;height:100vh;height:100dvh; /* dvh se ajusta solo cuando la barra de direcciones del móvil aparece/desaparece; 100vh es el respaldo para navegadores muy antiguos que no conozcan dvh */
+    background-color:var(--bg); /* respaldo sólido oscuro mientras carga el gradiente */
+    background-image:linear-gradient(-45deg,#1A1A2E,#16213E,#0F3460,#16213E,#1A1A2E);
+    background-size:400% 400%;
+    animation:gradientAnimation 22s ease infinite;
+    overflow:hidden;position:relative;display:flex;flex-direction:column}
+/* Solo en pantallas más anchas que la propia app (PC): un fondo algo
+   más oscuro alrededor y una sombra suave, para distinguir la app del
+   espacio vacío de los lados — sin bordes ni esquinas redondeadas que
+   compliquen el alto exacto de la pantalla. */
+@media(min-width:520px){
+  body{background:#060D18}
+  .ph{box-shadow:0 0 70px rgba(0,0,0,.55)}
+}
+
+@keyframes gradientAnimation{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* ── STATUS ── */
+.sb{height:44px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sb-t{font-size:14px;font-weight:700}
+
+/* ── MINI-TREN ANIMADO (status bar) — puramente cosmético ── */
+.sb-left{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.train-track{position:relative;width:56px;height:15px;overflow:hidden;flex-shrink:0;pointer-events:none}
+.train-animation{position:absolute;top:0;left:0;width:32px;height:15px;
+  animation:moveTrain 12s linear infinite;will-change:transform;pointer-events:none}
+@keyframes moveTrain{
+  0%{transform:translateX(-38px);opacity:0}
+  6%{opacity:1}
+  94%{opacity:1}
+  100%{transform:translateX(60px);opacity:0}
+}
+.sb-r{font-size:10px;color:var(--tx2);display:flex;gap:5px;align-items:center}
+
+/* ── HEADER ── */
+.hdr{padding:4px 18px 12px;border-bottom:1px solid var(--div);flex-shrink:0}
+.hdr-top{display:flex;align-items:center;justify-content:space-between}
+.hdr-titulo{font-size:20px;font-weight:900;letter-spacing:-.5px}
+.hdr-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:800;letter-spacing:.8px;margin-top:3px}
+.pill-t{background:rgba(37,99,235,.15);color:var(--acc2);border:1px solid rgba(37,99,235,.3)}
+.pill-a{background:rgba(249,115,22,.15);color:var(--nar2);border:1px solid rgba(249,115,22,.3)}
+.hdr-btns{display:flex;gap:5px}
+.hbtn{width:34px;height:34px;border-radius:9px;background:var(--s2);border:none;color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .18s}
+.hbtn:hover{background:var(--acc);color:#fff}
+
+/* ── SCROLLABLE BODY ── */
+.body{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;min-height:0}
+.body::-webkit-scrollbar{display:none}
+
+/* ── PANELS ── */
+.panel{display:none;flex-direction:column;padding-bottom:72px}
+.panel.on{display:flex}
+
+/* ── MES NAV — minimalista ── */
+.mes-nav{display:flex;align-items:center;padding:14px 18px 10px;gap:4px}
+.mn-btn{background:rgba(255,255,255,.06);border:none;color:var(--tx2);font-size:18px;
+        cursor:pointer;border-radius:10px;width:34px;height:34px;
+        display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+.mn-btn:hover{background:rgba(37,99,235,.18);color:var(--acc2)}
+.mn-lbl-wrap{flex:1;text-align:center}
+.mn-lbl{font-size:17px;font-weight:800;letter-spacing:-.4px}
+.mn-sub{font-size:9px;color:var(--tx3);margin-top:1px}
+.mn-hoy{font-size:10px;color:var(--nar2);font-weight:700;cursor:pointer;
+        padding:3px 10px;background:rgba(249,115,22,.12);border-radius:20px;
+        border:1px solid rgba(249,115,22,.28);flex-shrink:0}
+
+/* ── SWIPE WRAPPER ──
+   touch-action:pan-y → el navegador gestiona scroll vertical nativamente.
+   Nuestro JS solo captura los gestos horizontales confirmados. */
+.cal-swipe{overflow:hidden;touch-action:pan-y;position:relative;padding:0 10px;user-select:none}
+.cal-track{display:flex;will-change:transform;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.cal-slide{min-width:100%;flex-shrink:0}
+
+/* ── CALENDAR CARD — card con sombra ── */
+.cal-box{background:var(--s1);border-radius:20px;padding:12px 10px 10px;
+         border:1px solid var(--div);box-shadow:var(--sh-card)}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:7px}
+.dw{text-align:center;font-size:9px;color:var(--tx3);font-weight:700;letter-spacing:.5px;padding:3px 0}
+.days{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,1fr);gap:3px;height:258px}
+.dc{border-radius:10px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;cursor:pointer;
+    border:1.5px solid transparent;transition:all .13s;
+    font-size:12px;font-weight:500;user-select:none;min-height:0;overflow:hidden}
+.dc:active{transform:scale(.88)}
+.dc-0{opacity:0;pointer-events:none}
+.dc-out{color:var(--tx3);opacity:.28}
+/* Hoy: anillo naranja */
+.dc-hoy{border-color:var(--nar)!important;color:var(--nar3)!important;font-weight:800}
+
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — Modo selección para borrado múltiple (maqueta A,
+   aprobada por Alex). Mantener pulsado un día entra en este modo;
+   tocar más días los añade/quita de la selección; una barra fija
+   abajo confirma o cancela. Aditivo — no toca .dc en su estado normal.
+═══════════════════════════════════════════════════════════ */
+.dc-marcado-borrar{outline:2.5px solid var(--nar)!important;transform:scale(.93)!important;background:rgba(249,115,22,.14)!important}
+/* FIX — el mantener pulsado en móvil puede disparar selección de
+   texto / menú de "copiar" nativo del sistema, que retrasa el
+   repintado hasta soltar el dedo. Se desactiva SOLO en las celdas
+   del calendario, sin tocar el resto de la app. */
+.dc{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.dc-check-borrar{position:absolute;top:2px;right:2px;width:15px;height:15px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.5);background:rgba(0,0,0,.25);
+  display:none;align-items:center;justify-content:center;font-size:9px;z-index:2}
+.modo-seleccion-borrado .dc-check-borrar{display:flex}
+.dc-marcado-borrar .dc-check-borrar{background:var(--nar);border-color:var(--nar);color:#1a1006;font-weight:900}
+#barra-borrado-masivo{position:fixed;left:0;right:0;bottom:0;background:var(--s1);
+  border-top:1px solid var(--div);padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+  display:none;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 -10px 30px rgba(0,0,0,.4);z-index:150}
+#barra-borrado-masivo.on{display:flex}
+#barra-borrado-masivo .bbm-count{font-size:13px;font-weight:800;color:var(--tx)}
+#barra-borrado-masivo .bbm-btns{display:flex;gap:8px}
+#barra-borrado-masivo button{padding:10px 16px;border-radius:10px;border:none;font-weight:800;font-size:12.5px;cursor:pointer}
+#barra-borrado-masivo .bbm-cancel{background:var(--s2);color:var(--tx2);border:1px solid var(--div)}
+#barra-borrado-masivo .bbm-del{background:#DC2626;color:#fff}
+
+/* NUEVO — Sistema Horario Compañero: badge azul con el turno del
+   compañero, superpuesto en la celda, y modo "solo compañero" que
+   atenúa (no oculta del todo, para no perder los badges de retraso/
+   parking) el contenido propio del día cuando vistaMode==='comp'. */
+.dc-comp-badge{
+  position:absolute;top:1px;right:1px;
+  font-size:6px;line-height:1;white-space:nowrap;max-width:calc(100% - 4px);
+  overflow:hidden;text-overflow:ellipsis;
+  background:rgba(37,99,235,.9);color:#fff;
+  border-radius:3px;padding:1px 3px;font-weight:900;letter-spacing:.1px;
+}
+.cal-modo-comp-solo .dc > span:first-of-type{opacity:.35}
+.cal-modo-comp-solo .dc-ico{opacity:.35}
+
+/* NUEVO — comparativa lado a lado dentro del Buscador de Compañeros
+   (Tú vs la persona buscada), independiente del Calendario. */
+.comp-cmp-head,.comp-cmp-row{display:grid;grid-template-columns:28px 1fr 1fr;gap:6px;align-items:center;padding:4px 2px}
+.comp-cmp-head{font-size:9px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--div);padding-bottom:6px;margin-bottom:2px}
+.comp-cmp-row{font-size:10px;border-bottom:1px solid rgba(255,255,255,.04)}
+.comp-cmp-row:nth-child(odd){background:rgba(255,255,255,.02)}
+.comp-cmp-day{font-weight:800;color:var(--tx3);text-align:center}
+.comp-cmp-mio{color:#93c5fd}
+.comp-cmp-suyo{color:#6ee7b7}
+/* Seleccionado: fill azul */
+.dc-sel{background:var(--acc)!important;color:#fff!important;border-color:var(--acc)!important;font-weight:800!important}
+/* Tipos */
+.dc-ord{background:rgba(37,99,235,.2);border-color:rgba(37,99,235,.5);color:#93C5FD;font-weight:700}
+.dc-res{background:rgba(217,119,6,.2);border-color:rgba(217,119,6,.5);color:#FCD34D;font-weight:700}
+.dc-des{background:rgba(22,163,74,.2);border-color:rgba(22,163,74,.5);color:#86EFAC;font-weight:700}
+.dc-baj{background:rgba(220,38,38,.2);border-color:rgba(220,38,38,.5);color:#FCA5A5;font-weight:700}
+.dc-tra{background:rgba(124,58,237,.2);border-color:rgba(124,58,237,.5);color:#C4B5FD;font-weight:700}
+.dc-cmp{background:rgba(8,145,178,.25);border-color:rgba(8,145,178,.6);color:#67E8F9;font-weight:700}
+.dc-dop{background:rgba(219,39,119,.2);border-color:rgba(219,39,119,.5);color:#F9A8D4;font-weight:700}
+/* NUEVO — FIX: esta regla faltaba. TIPO_INFO.art5152.cls='dc-art5152' se
+   asignaba correctamente en renderSlide() pero, al no existir la regla,
+   la celda no mostraba ningún color distintivo (bug reportado). */
+.dc-art5152{background:rgba(59,127,255,.2);border-color:rgba(59,127,255,.5);color:#93C5FD;font-weight:700}
+
+/* ── COMPANION CALENDAR STYLES ── */
+.dc-comp-ordinario{background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4)}
+.dc-comp-descanso{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3)}
+.dc-comp-vacaciones{background:rgba(236,72,153,.1);border-color:rgba(236,72,153,.3)}
+.dc-comp-baja{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3)}
+.dc-comp-reserva{background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.25)}
+.dc-comp-only{background:rgba(168,85,247,.08);border:1.5px dashed rgba(168,85,247,.4)}
+.dc-split{background:linear-gradient(135deg,rgba(59,130,246,.18) 50%,rgba(168,85,247,.18) 50%)!important;border-color:#4f46e5!important}
+/* Vista toggle */
+.vista-toggle{display:flex;background:var(--s2);border-radius:10px;padding:3px;gap:3px;margin:6px 12px}
+.vista-btn{flex:1;padding:5px 2px;border:none;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;background:transparent;color:var(--tx3);transition:all .18s}
+.vista-btn.act{background:var(--s1);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.vista-btn.act-comp{background:rgba(168,85,247,.25);color:#c084fc}
+.vista-btn.act-both{background:rgba(99,102,241,.2);color:#a5b4fc}
+
+.dc-ico{font-size:14px;line-height:1;margin-top:0}
+
+/* ── LEYENDA ── */
+.leyenda{display:flex;gap:5px;overflow-x:auto;padding:8px 10px;scrollbar-width:none}
+.leyenda::-webkit-scrollbar{display:none}
+.leg{display:flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;
+     font-size:9px;font-weight:700;flex-shrink:0;border:1px solid;
+     box-shadow:0 2px 6px rgba(0,0,0,.3)}
+
+/* ── ACORDEÓN (historial por mes) ── */
+.acordeon{margin:6px 10px;border-radius:14px;overflow:hidden;border:1px solid var(--div);background:var(--s1)}
+.ac-item{border-bottom:1px solid var(--div)}
+.ac-item:last-child{border-bottom:none}
+.ac-hdr{display:flex;align-items:center;gap:8px;padding:10px 13px;cursor:pointer;transition:background .15s;user-select:none}
+.ac-hdr:hover{background:var(--s2)}
+.ac-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ac-fecha{font-size:11px;font-weight:700;flex:1}
+.ac-tipo{font-size:10px;color:var(--tx2)}
+.ac-arr{font-size:12px;color:var(--tx3);transition:transform .22s;flex-shrink:0}
+.ac-item.open .ac-arr{transform:rotate(90deg)}
+.ac-body{padding:0 13px 10px;font-size:11px;color:var(--tx2);line-height:1.6}
+.ac-row{display:flex;justify-content:space-between;padding:2px 0}
+.ac-row .ak{color:var(--tx3)}
+.ac-row .av{color:var(--tx);font-weight:600}
+.ac-imp{margin-top:5px;padding:6px 10px;background:rgba(59,127,255,.08);border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+.ac-imp .al{font-size:10px;color:var(--tx2)}
+.ac-imp .ar{font-size:15px;font-weight:800;color:var(--acc2);font-variant-numeric:tabular-nums}
+
+/* ── DÍA CARD ── */
+.dia-area{padding:7px 10px 10px}
+.dc-vac{background:var(--s2);border:1.5px dashed var(--div);border-radius:14px;
+          display:flex;flex-direction:column;align-items:center;justify-content:center;
+          gap:6px;padding:18px;cursor:pointer;transition:all .18s}
+.dc-vac:hover{border-color:var(--acc2)}
+.dcv-ico{font-size:28px;opacity:.3}
+.dcv-fecha{font-size:13px;font-weight:700}
+.dcv-hint{font-size:10px;color:var(--tx2)}
+.dcv-btn{margin-top:3px;background:var(--acc);color:#fff;border:none;border-radius:9px;
+         padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer}
+.dc-turno{border-radius:14px;overflow:hidden;border:1.5px solid;background:var(--s1)}
+.dct-hdr{padding:10px 14px;display:flex;align-items:center;gap:9px}
+.dct-ico{font-size:20px}
+.dct-info{flex:1;min-width:0}
+.dct-fecha{font-size:10px;color:rgba(255,255,255,.55);margin-bottom:1px}
+.dct-tipo{font-size:16px;font-weight:800;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dct-dur{padding:3px 9px;border-radius:7px;background:rgba(0,0,0,.2);font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0}
+.dct-body{padding:8px 14px 10px}
+.tr-r{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:11px}
+.tr-r:last-child{border:none}
+.tr-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.tr-route{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr-time{font-size:10px;color:rgba(255,255,255,.45);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tr-hi{color:var(--acc3);font-weight:700}
+.dct-foot{padding:7px 14px;display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,.05);font-size:10px;color:rgba(255,255,255,.35)}
+.dct-del{background:rgba(239,68,68,.12);border:none;border-radius:6px;color:#FCA5A5;font-size:10px;font-weight:700;padding:3px 9px;cursor:pointer;transition:background .18s}
+.dct-del:hover{background:rgba(239,68,68,.28)}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:absolute;bottom:0;left:0;right:0;height:68px;background:var(--s1);
+      border-top:1px solid var(--div);display:flex;align-items:flex-start;padding-top:9px;z-index:40;flex-shrink:0;
+      padding-bottom:calc(20px + env(safe-area-inset-bottom));height:calc(68px + env(safe-area-inset-bottom))}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;background:none;border:none;color:var(--tx2);transition:color .18s;padding:2px}
+.bni.on{color:var(--nar2)}
+.bni .bi{font-size:19px}
+.bni .bl{font-size:9px;font-weight:700;letter-spacing:.3px}
+.bni .bd{width:4px;height:4px;background:var(--nar2);border-radius:2px;opacity:0;margin-top:1px}
+.bni.on .bd{opacity:1}
+

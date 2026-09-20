@@ -1,0 +1,305 @@
+/* TrenTurnos v5 — Splash, sugerencias de tren, check-in, tutorial, convenio, nómina, chatbot. Separado del <style> único original (orden de carga = orden del cascade, ver index.html). */
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — SPLASH SCREEN: tren cayendo + efecto de "rotura" que
+   revela la app. Solo @keyframes CSS, sin librerías externas.
+   Bloque 100% aditivo — no modifica ninguna regla existente.
+═══════════════════════════════════════════════════════════ */
+#splash-screen{position:fixed;inset:0;z-index:9999;overflow:hidden;pointer-events:none}
+.splash-half{position:fixed;top:0;bottom:0;width:50%;background:var(--bg);
+  display:flex;align-items:center;justify-content:center}
+.splash-left{left:0;border-right:1px solid rgba(147,197,253,.15);
+  animation:splashTearLeft .55s cubic-bezier(.6,0,1,1) 1.05s forwards}
+.splash-right{right:0;border-left:1px solid rgba(147,197,253,.15);
+  animation:splashTearRight .55s cubic-bezier(.6,0,1,1) 1.05s forwards}
+.splash-crack{position:fixed;top:0;left:50%;width:3px;height:0;
+  background:linear-gradient(180deg,#93C5FD,#2563EB,#93C5FD);
+  transform:translateX(-50%);opacity:0;
+  box-shadow:0 0 18px 3px rgba(59,130,246,.7);
+  animation:splashCrackIn .35s ease .78s forwards,
+            splashCrackOut .3s ease 1.05s forwards}
+#splash-train{position:fixed;left:50%;top:-90px;width:72px;height:auto;
+  transform:translateX(-50%);filter:drop-shadow(0 6px 14px rgba(37,99,235,.55));
+  animation:splashTrainFall .95s cubic-bezier(.56,0,1,.44) forwards}
+.splash-brand{position:fixed;left:50%;bottom:18%;transform:translateX(-50%);
+  color:var(--acc3);font-weight:800;font-size:15px;letter-spacing:2px;
+  text-transform:uppercase;opacity:0;
+  animation:splashBrandIn .5s ease .25s forwards,
+            splashBrandOut .3s ease 1.15s forwards}
+
+@keyframes splashTrainFall{
+  0%{top:-90px;transform:translateX(-50%) rotate(0deg)}
+  75%{top:44%;transform:translateX(-50%) rotate(0deg)}
+  88%{top:47%;transform:translateX(-50%) rotate(-2deg)}
+  100%{top:46%;transform:translateX(-50%) rotate(0deg)}
+}
+@keyframes splashCrackIn{
+  0%{height:0;opacity:0}
+  100%{height:100%;opacity:1}
+}
+@keyframes splashCrackOut{
+  0%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes splashTearLeft{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-100%)}
+}
+@keyframes splashTearRight{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(100%)}
+}
+@keyframes splashBrandIn{
+  0%{opacity:0;transform:translateX(-50%) translateY(6px)}
+  100%{opacity:1;transform:translateX(-50%) translateY(0)}
+}
+@keyframes splashBrandOut{
+  0%{opacity:1}
+  100%{opacity:0}
+}
+@media (prefers-reduced-motion: reduce){
+  #splash-train,.splash-half,.splash-crack,.splash-brand{animation-duration:.01ms!important}
+}
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — Desplegable de sugerencias de tren (sustituye al
+   <datalist> nativo, que no se puede estilizar). Reutiliza la misma
+   paleta y sombra que el resto de "TrenTurnos v5".
+═══════════════════════════════════════════════════════════ */
+.tren-suggest-list{position:fixed;margin-top:0;
+  background:var(--s2);border:1.5px solid var(--div);border-radius:12px;
+  box-shadow:var(--sh-card);max-height:220px;overflow-y:auto;z-index:9500}
+.tren-suggest-item{padding:9px 12px;cursor:pointer;
+  border-bottom:1px solid var(--div);display:flex;flex-direction:column;gap:1px}
+.tren-suggest-item:last-child{border-bottom:none}
+.tren-suggest-item:hover,.tren-suggest-item.activo{background:rgba(59,127,255,.14)}
+.tren-suggest-num{font-weight:800;color:var(--acc3);font-size:12px}
+.tren-suggest-ruta{font-size:10px;color:var(--tx3)}
+/* ═══════════════════════════════════════════════════════════
+   MÓDULO CHECK-IN DEL DÍA — v2 (reconstruido). Mismo lenguaje
+   visual que el resto de píldoras/botones de la app.
+═══════════════════════════════════════════════════════════ */
+.ci-pill{font-size:10px;color:var(--acc2);font-weight:700;cursor:pointer;padding:3px 10px;
+  background:var(--s2);border:1px solid var(--acc);border-radius:20px;flex-shrink:0;
+  display:flex;align-items:center;gap:4px;white-space:nowrap}
+.ci-pill.ci-pill-bloqueado{color:var(--green2);border-color:var(--green)}
+.ci-day-nav{display:flex;align-items:center;gap:4px;padding:12px 16px 8px}
+.ci-day-btn{background:rgba(255,255,255,.06);border:none;color:var(--tx2);font-size:16px;cursor:pointer;
+  width:30px;height:30px;border-radius:8px;flex-shrink:0}
+.ci-day-btn:disabled{opacity:.25;cursor:default}
+.ci-day-lbl{flex:1;text-align:center;font-size:13px;font-weight:800;letter-spacing:-.2px}
+.ci-day-hoy-badge{font-size:9px;font-weight:800;color:var(--nar2);background:rgba(249,115,22,.12);
+  border:1px solid rgba(249,115,22,.35);border-radius:8px;padding:2px 7px}
+.ci-hist-note{margin:4px 16px 10px;font-size:10px;color:var(--tx3);text-align:center;line-height:1.4}
+.ci-empty{background:var(--s2);border:1.5px dashed var(--div);border-radius:14px;margin:4px 16px 14px;
+  padding:26px 18px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.ci-empty-ico{font-size:30px;opacity:.5}
+.ci-empty-tit{font-size:13px;font-weight:700;text-align:center;color:var(--tx)}
+.ci-empty-sub{font-size:11px;color:var(--tx2);line-height:1.5;text-align:center;margin-top:2px}
+.ci-btn-subir{margin-top:6px;background:var(--acc);color:#fff;border:none;border-radius:9px;
+  padding:11px 20px;font-size:12.5px;font-weight:800;cursor:pointer}
+.ci-consejo{font-size:9.5px;color:var(--tx3);line-height:1.5;margin-top:10px;text-align:center;padding:0 6px}
+.ci-locked-foot{margin:6px 16px 10px;padding:9px 12px;background:var(--s1);border:1px solid var(--div);
+  border-radius:10px;font-size:10.5px;color:var(--tx2);text-align:center}
+.ci-seccion-hdr{display:flex;align-items:center;gap:6px;margin:16px 16px 8px}
+.ci-seccion-hdr-tit{font-size:11px;font-weight:800;letter-spacing:.3px;color:var(--tx2);text-transform:uppercase}
+.ci-seccion-hdr::after{content:'';flex:1;height:1px;background:var(--div)}
+.ci-res-tramo{color:var(--tx3);font-size:9px}
+.ci-res-horas{font-size:11px;font-weight:800;color:var(--tx2);font-variant-numeric:tabular-nums;flex-shrink:0}
+.ci-btn-eliminar{width:100%;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);
+  color:#fca5a5;border-radius:9px;padding:11px;font-size:12px;font-weight:700;cursor:pointer}
+.ci-grupo{margin:0 16px 12px;border-radius:16px;background:var(--s1);border:1px solid var(--div);overflow:hidden}
+.ci-ghdr{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--s2);border-bottom:1px solid var(--div)}
+.ci-hora{font-size:14px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--acc3);width:48px;flex-shrink:0}
+.ci-hora.est-falta{font-size:12px;color:var(--tx3);font-weight:700}
+.ci-count{font-size:8.5px;color:var(--tx3);font-weight:800;background:var(--s3);padding:2px 7px;border-radius:20px;margin-left:auto;flex-shrink:0}
+.ci-persona{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+.ci-persona:last-child{border-bottom:none}
+.ci-mat{font-size:8.5px;color:var(--tx3);font-family:monospace;width:52px;flex-shrink:0}
+.ci-editable{cursor:pointer;border-bottom:1px dashed rgba(148,163,184,.4);padding-bottom:1px}
+.ci-editable:active{background:rgba(249,115,22,.12);border-radius:4px}
+.ci-nom{flex:1;min-width:0}
+.ci-nom-tx{font-size:11.5px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci-ruta{display:flex;gap:3px;align-items:baseline;margin-top:2px;font-size:8px;flex-wrap:wrap}
+.ci-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ci-vistazo-note{margin:4px 16px 12px;padding:10px 12px;background:rgba(249,115,22,.08);
+  border:1px solid rgba(249,115,22,.25);border-radius:10px;font-size:10.5px;color:var(--nar3);line-height:1.5}
+.ci-vistazo-btns{position:sticky;bottom:0;background:var(--s1);border-top:1px solid var(--div);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px}
+.ci-btn-cancelar{height:42px;padding:0 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
+  color:#fca5a5;border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer}
+.ci-btn-confirmar{flex:1;height:42px;background:var(--acc);border:none;border-radius:10px;color:#fff;
+  font-size:13px;font-weight:800;cursor:pointer}
+.ci-progreso{padding:30px 20px;text-align:center;font-size:12px;color:var(--tx2)}
+.ci-progreso-ico{font-size:28px;margin-bottom:10px;animation:ciSpin 1.4s linear infinite;display:inline-block}
+@keyframes ciSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.ci-progreso-bar{height:4px;background:var(--s2);border-radius:3px;margin:14px 20px 0;overflow:hidden}
+.ci-progreso-fill{height:100%;background:var(--acc);border-radius:3px;transition:width .2s;width:0%}
+/* Ruta de tren (cabecera de grupo y por persona) + chips de posición */
+.turno-code{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
+.tc-first{font-size:13px;font-weight:900;color:var(--tx)}
+.tc-first-mini{font-size:9.5px;font-weight:800;color:var(--tx2)}
+.tc-rest{font-size:9.5px;font-weight:700;color:var(--tx3)}
+.tc-arrow{font-size:8px;color:var(--tx3);margin:0 1px}
+.tc-warn{color:var(--nar2)!important}
+.tc-warn-ico{font-size:8px;margin-right:2px}
+.est-falta{font-size:10px;color:var(--tx3);font-style:italic}
+.est-obs{font-size:9px;color:var(--tx3);margin-left:4px}
+.pos-chip{font-size:8px;font-weight:800;padding:2px 6px;border-radius:6px;background:var(--s3);color:var(--tx2);flex-shrink:0}
+.pos-chip.pos-CP{background:rgba(37,99,235,.15);color:#93c5fd}
+.pos-chip.pos-TCF{background:rgba(16,185,129,.15);color:#6ee7b7}
+.pos-chip.pos-JT{background:rgba(249,115,22,.15);color:#fdba74}
+.pos-chip.pos-CC{background:rgba(168,85,247,.15);color:#d8b4fe}
+/* NUEVO — Tutorial (acordeón por tema) */
+.tut-item{border-bottom:1px solid var(--div)}
+.tut-item-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer}
+.tut-item-ico{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.tut-item-tit{font-size:13px;font-weight:700;color:var(--tx);flex:1}
+.tut-item-arr{font-size:11px;color:var(--tx3);transition:transform .2s;flex-shrink:0}
+.tut-item.open .tut-item-arr{transform:rotate(90deg)}
+.tut-item-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.tut-item.open .tut-item-body{max-height:600px}
+
+/* NUEVO — Confirmado por Alex: lector del Convenio Colectivo — tarjeta
+   de entrada en el Tutorial + pantalla de lectura completa. */
+.conv-entrada{margin:14px 16px;padding:16px;border-radius:16px;background:linear-gradient(135deg, rgba(124,58,237,.14), rgba(37,99,235,.08));border:1px solid rgba(124,58,237,.35);cursor:pointer}
+.conv-entrada-tit{font-size:15px;font-weight:900;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.conv-entrada-sub{font-size:12px;color:var(--tx2);line-height:1.5;margin-bottom:12px}
+.conv-entrada-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--violet);color:#fff;font-weight:800;font-size:13px;padding:11px;border-radius:12px}
+.conv-search-inp{width:100%;padding:11px 14px;border-radius:12px;background:var(--s1);border:1px solid var(--div);color:var(--tx);font-size:13px;margin:0 0 4px}
+.conv-cap-tit{font-size:10.5px;font-weight:900;letter-spacing:.4px;color:var(--violet2);text-transform:uppercase;margin:16px 6px 6px}
+.conv-art-row{background:var(--s1);border:1px solid var(--div);border-radius:12px;margin-bottom:6px;overflow:hidden}
+.conv-art-row-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.conv-art-row-n{font-size:10px;font-weight:900;color:var(--tx3);background:var(--s2);border-radius:6px;padding:2px 6px;white-space:nowrap;flex-shrink:0}
+.conv-art-row-tit{flex:1;font-size:12.5px;font-weight:700}
+.conv-art-row-arr{color:var(--tx3);font-size:14px;transition:transform .2s;flex-shrink:0}
+.conv-art-row.open .conv-art-row-arr{transform:rotate(90deg)}
+.conv-art-row-body{display:none;padding:0 14px 14px;font-size:12px;line-height:1.65;color:var(--tx2);white-space:pre-line}
+.conv-art-row.open .conv-art-row-body{display:block;border-top:1px solid var(--div);padding-top:10px}
+.conv-empty{text-align:center;padding:30px 14px;color:var(--tx3);font-size:12.5px}
+.chat-conv-fuente{margin-top:10px;padding:8px 10px;background:rgba(124,58,237,.10);border-radius:8px;font-size:10.5px;color:var(--violet2);display:flex;align-items:center;gap:6px;cursor:pointer}
+.tut-step{display:flex;gap:10px;padding:9px 18px 9px 40px;font-size:12.5px;color:var(--tx2);line-height:1.55}
+.tut-step-n{width:19px;height:19px;border-radius:50%;background:var(--acc);color:#fff;font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.tut-admin-badge{font-size:8px;font-weight:800;color:var(--nar2);background:rgba(249,115,22,.12);
+  border:1px solid rgba(249,115,22,.3);border-radius:8px;padding:2px 6px;flex-shrink:0}
+/* NUEVO — Compañeros: selector de tarjetas + detalle estilo Hero
+   (confirmado por Alex tras varias rondas de maqueta) */
+.c4-cards{display:flex;flex-direction:column;gap:12px;padding:16px 14px}
+.c4-card{display:flex;align-items:center;gap:14px;padding:18px;background:var(--s1);border:1px solid var(--div);border-radius:18px;cursor:pointer}
+.c4-card:active{border-color:var(--acc)}
+.c4-ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.c4-ico.nombre{background:rgba(37,99,235,.15)}
+.c4-ico.tren{background:rgba(249,115,22,.15)}
+.c4-info-tit{font-size:14.5px;font-weight:800;color:var(--tx)}
+.c4-info-sub{font-size:10.5px;color:var(--tx3);margin-top:2px}
+.c4-arr{margin-left:auto;color:var(--tx3);font-size:16px}
+.vc2-back-top{padding:12px 14px 0;font-size:12px;font-weight:800;color:var(--acc2);cursor:pointer}
+.vc2-hero{padding:16px 18px 16px;background:linear-gradient(135deg,rgba(37,99,235,.15),transparent);display:flex;align-items:center;gap:14px}
+.vc2-hero-ico{width:52px;height:52px;border-radius:16px;background:rgba(37,99,235,.2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.vc2-hero-tit{font-size:17px;font-weight:900;color:var(--tx)}
+.vc2-hero-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+/* NUEVO — Nómina Estimada */
+.nom-tab-btn{flex:1;text-align:center;padding:9px;border-radius:9px;font-size:11.5px;font-weight:800;color:var(--tx3);cursor:pointer}
+.nom-tab-btn.act{background:var(--acc);color:#fff}
+.nom-sec-hdr{padding:14px 18px 6px;font-size:11px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px}
+.nom-row{display:flex;justify-content:space-between;align-items:center;padding:8px 18px;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04)}
+.nom-row-label{color:var(--tx2)}
+.nom-row-sub{font-size:10px;color:var(--tx3);margin-top:1px}
+.nom-row-val{color:var(--tx);font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+.nom-row-manual{border:1px dashed var(--acc);border-radius:8px;margin:5px 18px;padding:8px 10px}
+.nom-input-mini{width:64px;background:var(--s1);border:1px solid var(--acc);border-radius:6px;padding:5px 6px;color:var(--tx);font-size:11.5px;font-weight:700;text-align:center}
+.rol-opt-stats{flex:1;text-align:center;padding:7px 4px;border-radius:9px;font-size:11px;font-weight:800;color:var(--tx3);cursor:pointer;background:var(--s2);border:1px solid var(--div)}
+.rol-opt-stats.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.nom-total-bruto{display:flex;justify-content:space-between;align-items:center;margin:14px 16px 8px;padding:12px 16px;background:var(--s1);border:1px solid var(--acc);border-radius:14px}
+.nom-total-bruto-lbl{font-size:11.5px;font-weight:800;color:var(--acc2)}
+.nom-total-bruto-val{font-size:17px;font-weight:900;color:var(--tx)}
+.nom-total-neto{display:flex;justify-content:space-between;align-items:center;margin:8px 16px 8px;padding:14px 16px;background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.05));border:1px solid rgba(34,197,94,.4);border-radius:14px}
+.nom-total-neto-lbl{font-size:12px;font-weight:800;color:#4ade80}
+.nom-total-neto-val{font-size:19px;font-weight:900;color:#fff}
+.nom-disclaimer{margin:8px 16px 4px;padding:10px 12px;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:10px;font-size:10px;color:#fdba74;line-height:1.5}
+.nom-caph-hint{margin:2px 16px 10px;padding:9px 12px;background:rgba(37,99,235,.08);border:1px dashed var(--acc);border-radius:10px;font-size:10.5px;color:var(--acc3);line-height:1.5;cursor:pointer}
+.nom-caph-hint u{color:var(--tx)}
+.nom-badge-prev{display:inline-block;font-size:8.5px;font-weight:800;color:var(--nar3);background:rgba(249,115,22,.16);border-radius:6px;padding:2px 6px;margin-left:4px;text-transform:none;letter-spacing:0}
+.nom-nota-precision{margin:2px 16px 14px;padding:10px 12px;background:var(--s1);border:1px solid var(--div);border-radius:10px;font-size:10.5px;color:var(--tx2);line-height:1.55}
+.nom-compe-reset{font-size:14px;color:var(--acc3);cursor:pointer;padding:2px 4px;border-radius:6px;background:rgba(37,99,235,.12)}
+
+/* NUEVO — Confirmado por el usuario: rediseño "paso a paso" de Nómina,
+   pensado para que también lo entiendan personas mayores — números
+   grandes, palabras normales, un paso a la vez en vez de todo junto. */
+.ns-step{display:flex;gap:12px;margin-bottom:2px}
+.ns-line{display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0}
+.ns-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;color:#fff;flex-shrink:0}
+.ns-num.n1{background:var(--acc)}
+.ns-num.n2{background:#16a34a}
+.ns-num.n3{background:#dc2626}
+.ns-num.n4{background:#d97706}
+.ns-connector{width:2px;flex:1;background:var(--div);margin:2px 0;min-height:16px}
+.ns-body{flex:1;padding-bottom:18px;min-width:0}
+.ns-tit{font-size:15px;font-weight:800;margin-bottom:3px;padding-top:4px;color:var(--tx)}
+.ns-sub{font-size:11.5px;color:var(--tx3);margin-bottom:8px;line-height:1.4}
+.ns-card{background:var(--s1);border:1px solid var(--div);border-radius:14px;padding:2px 14px}
+.ns-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px;
+  border-bottom:1px solid rgba(255,255,255,.05)}
+.ns-row:last-child{border-bottom:none}
+.ns-row-lbl{color:var(--tx2)}
+.ns-row-lbl small{color:var(--tx3);font-weight:500}
+.ns-row-val{font-weight:800;color:var(--tx);font-variant-numeric:tabular-nums}
+.ns-mini-inp{width:46px;background:var(--s2);border:1px dashed var(--tx3);border-radius:7px;color:var(--tx);
+  font-size:13px;font-weight:800;text-align:center;padding:4px 3px;margin-right:2px;font-variant-numeric:tabular-nums}
+.ns-final{background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(34,197,94,.06));
+  border:2px solid rgba(34,197,94,.5);border-radius:16px;padding:20px 18px;text-align:center;margin:6px 0 8px}
+.ns-final-lbl{font-size:13px;color:#86efac;font-weight:700;margin-bottom:6px}
+.ns-final-val{font-size:30px;font-weight:900;color:#fff}
+
+.nom-extras-tit{font-size:12px;font-weight:800;color:var(--tx3);letter-spacing:.4px;text-transform:uppercase;
+  margin:20px 2px 10px}
+.nom-extra-btn{width:100%;display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--s1);
+  border:1px solid var(--div);border-radius:14px;margin-bottom:8px;text-align:left;cursor:pointer}
+.nom-extra-ico{width:36px;height:36px;border-radius:11px;background:rgba(124,58,237,.16);display:flex;
+  align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.nom-extra-txt{flex:1;min-width:0}
+.nom-extra-tit{font-size:13.5px;font-weight:700;color:var(--tx)}
+.nom-extra-sub{font-size:11px;color:var(--tx3);margin-top:1px}
+.nom-extra-arr{color:var(--tx3);font-size:15px;flex-shrink:0}
+.nom-extra-content{margin-bottom:10px}
+/* NUEVO — Nómina Estimada: tres tarjetas apiladas (Estilo 2, aprobado por Alex) */
+.n2-card{margin:12px 16px;border-radius:16px;overflow:hidden;border:1px solid var(--div)}
+.n2-card.excel{border-color:rgba(217,119,6,.4)}
+.n2-card.cal{border-color:rgba(59,127,255,.4)}
+.n2-card.real{border-color:rgba(34,197,94,.5);box-shadow:0 0 0 1px rgba(34,197,94,.2)}
+.n2-hdr{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:12px;font-weight:800}
+.n2-card.excel .n2-hdr{background:rgba(217,119,6,.12);color:#FCD34D}
+.n2-card.cal .n2-hdr{background:rgba(59,127,255,.12);color:var(--acc2)}
+.n2-card.real .n2-hdr{background:rgba(34,197,94,.12);color:#4ade80}
+.n2-body{padding:6px 0 10px;background:var(--s1)}
+.n2-badge{margin-left:auto;font-size:8px;background:rgba(34,197,94,.2);color:#4ade80;padding:2px 6px;border-radius:6px;font-weight:800}
+/* NUEVO — Chatbot de ayuda (burbujas tipo conversación) */
+.chat-bienvenida{text-align:center;padding:20px 14px;color:var(--tx3);font-size:12px;line-height:1.6}
+.chat-msg{display:flex;margin-bottom:12px}
+.chat-msg.usuario{justify-content:flex-end}
+.chat-bubble{max-width:80%;padding:10px 13px;border-radius:14px;font-size:12.5px;line-height:1.55}
+.chat-msg.usuario .chat-bubble{background:var(--acc);color:#fff;border-bottom-right-radius:4px}
+.chat-msg.bot .chat-bubble{background:var(--s1);border:1px solid var(--div);color:var(--tx2);border-bottom-left-radius:4px}
+.chat-bubble .chat-tit{color:var(--tx);font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.chat-bubble .tut-step{padding:5px 0 5px 26px;font-size:12px}
+.chat-bubble .tut-step-n{width:16px;height:16px;font-size:9px}
+.chat-wa-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:#25D366;color:#fff;
+  border:none;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:800;text-decoration:none;cursor:pointer}
+/* NUEVO — vista "Vía" del check-in (maqueta 3, aprobada por Alex):
+   carril vertical con una parada por hora de toma, y los trenes de
+   esa hora colgando a la derecha como bloques. */
+.m3-track{padding:10px 16px 4px}
+.m3-item{display:flex;gap:14px}
+.m3-rail{width:14px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+.m3-dot{width:10px;height:10px;border-radius:50%;background:var(--acc);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--acc);margin-top:4px;flex-shrink:0}
+.m3-line{width:2px;flex:1;background:var(--div);margin-top:2px;min-height:12px}
+.m3-item:last-child .m3-line{display:none}
+.m3-content{flex:1;padding-bottom:14px;min-width:0}
+.m3-hora{font-size:13px;font-weight:900;color:var(--tx);margin-bottom:8px;font-variant-numeric:tabular-nums}
+.m3-hora.est-falta{font-size:11.5px;color:var(--tx3);font-weight:700}
+.m3-tren-block{background:var(--s1);border:1px solid var(--div);border-radius:12px;padding:8px 10px;margin-bottom:8px}
+.m3-tren-block .ci-persona{padding:8px 2px}
+.m3-tren-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;padding:0 2px}
+.m3-tren{font-size:12px;font-weight:800;color:var(--tx)}
+.m3-warn{color:var(--nar2)}
+.m3-cnt{font-size:8px;color:var(--tx3);font-weight:700;background:var(--s3);padding:1px 6px;border-radius:10px}

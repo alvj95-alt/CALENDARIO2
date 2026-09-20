@@ -1,0 +1,192 @@
+/* TrenTurnos v5 — Turnos del mes, cambios de turno, publicar cambio, tablón. Separado del <style> único original (orden de carga = orden del cascade, ver index.html). */
+/* NUEVO — Acordeón plegable "Turnos del mes" (calendario). Bloque
+   autocontenido, no depende de .aj-acc-* (Ajustes) para evitar
+   cualquier interferencia entre pantallas. */
+.turnos-mes-hdr{display:flex;align-items:center;gap:8px;padding:8px 10px 6px;
+  cursor:pointer;user-select:none}
+.turnos-mes-tit{flex:1;font-size:9px;font-weight:800;letter-spacing:1px;
+  color:var(--tx3);text-transform:uppercase}
+.turnos-mes-arr{font-size:14px;color:var(--tx3);
+  transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.turnos-mes-arr.abierto{transform:rotate(90deg)}
+
+/* NUEVO — Confirmado por el usuario: mismas clases y forma visual
+   que la maqueta aprobada (maqueta_cambio_turno.html), solo que
+   ahora con var(--...) reales de la app en vez de hex sueltos. */
+/* FIX — Confirmado por el usuario: más llamativo, para que se note
+   de un vistazo entre el resto de la pantalla — fondo con tono
+   azul degradado, borde más marcado, y un resplandor suave. */
+.ct-menu-card{display:flex;align-items:center;gap:14px;padding:16px;
+  background:linear-gradient(135deg, rgba(37,99,235,.16), rgba(37,99,235,.05));
+  border:1.5px solid rgba(37,99,235,.55);border-radius:16px;cursor:pointer;margin-bottom:12px;
+  box-shadow:0 0 0 1px rgba(37,99,235,.08), 0 6px 20px rgba(37,99,235,.18)}
+.ct-menu-ico{width:44px;height:44px;border-radius:12px;background:var(--acc);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+  box-shadow:0 3px 10px rgba(37,99,235,.4)}
+.ct-menu-tit{font-size:14.5px;font-weight:800;color:var(--tx)}
+.ct-menu-sub{font-size:11px;color:var(--tx3);margin-top:2px}
+.ct-menu-arr{color:var(--acc3,var(--tx3));font-size:16px;margin-left:auto}
+
+/* NUEVO — Confirmado por el usuario: encabezado de "Cambios de
+   turno" más llamativo que un acordeón normal, para que se note
+   entre el resto de la pantalla de Calendario. */
+.ct-hdr-llamativo{display:flex;align-items:center;gap:8px;padding:11px 14px;margin:6px 0;
+  background:linear-gradient(135deg, rgba(37,99,235,.18), rgba(37,99,235,.06));
+  border:1.5px solid rgba(37,99,235,.5);border-radius:14px;cursor:pointer;user-select:none;
+  box-shadow:0 4px 14px rgba(37,99,235,.15)}
+.ct-hdr-tit{font-size:12.5px;font-weight:800;color:var(--tx);letter-spacing:.2px}
+.ct-hdr-guia{margin-left:auto;font-size:10px;font-weight:800;color:var(--acc);
+  background:rgba(255,255,255,.06);padding:4px 9px;border-radius:20px;border:1px solid rgba(37,99,235,.4)}
+
+/* NUEVO — Confirmado por el usuario: "Publicar un cambio" — misma
+   forma que las otras tarjetas .ct-menu-card, pero en naranja para
+   distinguirla de un vistazo (tablón público, no solicitud directa). */
+.ct-menu-card-publicar{border-color:rgba(249,115,22,.5);
+  background:linear-gradient(135deg, rgba(249,115,22,.14), rgba(249,115,22,.04))}
+
+/* NUEVO — checkbox para elegir uno o varios días seguidos, y aviso
+   de "secuencia" cuando hay más de uno marcado. */
+.ct-day-check{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s1);
+  border:1px solid var(--div);border-radius:11px;margin-bottom:7px;cursor:pointer}
+.ct-day-check.sel{border-color:var(--nar);background:rgba(249,115,22,.08)}
+.ct-check-box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--div);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent}
+.ct-check-box.on{background:var(--nar);border-color:var(--nar);color:#1a1306;font-weight:900}
+.ct-seq-note{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.4);border-radius:10px;
+  padding:9px 11px;font-size:10.5px;color:var(--nar2);margin:10px 0}
+.ct-publish-btn{width:100%;padding:13px;background:var(--nar);border:none;border-radius:12px;
+  color:#1a1306;font-weight:800;font-size:13px;text-align:center;cursor:pointer}
+
+/* NUEVO — tarjetas del tablón público de publicaciones */
+.ct-feed-item{background:var(--s1);border:1px solid var(--div);border-radius:14px;padding:13px;margin-bottom:11px}
+.ct-feed-hdr{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.ct-feed-name{font-size:12px;font-weight:800;color:var(--tx)}
+.ct-feed-sub{font-size:9.5px;color:var(--tx3)}
+.ct-feed-expiry{font-size:9px;font-weight:700;color:var(--tx3);margin-left:auto;white-space:nowrap}
+.ct-feed-turno{background:var(--s2);border-radius:9px;padding:9px 10px;margin-bottom:9px}
+.ct-feed-turno-day{font-size:12px;font-weight:800;color:var(--tx)}
+.ct-feed-turno-tren{font-size:10.5px;color:#93C5FD;margin-top:3px}
+.ct-feed-note{font-size:10.5px;font-style:italic;color:var(--tx2);margin-bottom:9px}
+.ct-tabs{display:flex;gap:6px;background:var(--s1);border:1px solid var(--div);border-radius:11px;padding:4px;margin-bottom:14px}
+.ct-tab{flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:11.5px;font-weight:700;color:var(--tx3);cursor:pointer}
+.ct-tab.on{background:var(--nar);color:#1a1306}
+
+.ct-field-lbl{font-size:10.5px;font-weight:800;color:var(--tx3);text-transform:uppercase;
+  letter-spacing:.4px;margin:14px 0 7px}
+.ct-pcard-mini{display:flex;align-items:center;gap:10px;background:var(--s1);
+  border:1px solid var(--acc);border-radius:12px;padding:10px 12px;margin-top:8px}
+.ct-pcard-av{width:30px;height:30px;border-radius:9px;background:rgba(37,99,235,.2);
+  color:#93c5fd;display:flex;align-items:center;justify-content:center;font-size:12px;
+  font-weight:800;flex-shrink:0}
+.ct-pcard-name{font-size:12.5px;font-weight:700;color:var(--tx)}
+.ct-day-pick{background:var(--s1);border:1px solid var(--div);border-radius:12px;
+  padding:12px 14px;margin-top:6px}
+.ct-day-pick-tit{font-size:12.5px;font-weight:700;color:var(--tx)}
+.ct-day-pick-turno{font-size:11.5px;color:#93c5fd;margin-top:4px}
+.ct-pernocta-tag{display:inline-block;background:rgba(168,85,247,.18);color:#c084fc;
+  font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px;margin-top:6px}
+.ct-msg-box{background:var(--s1);border:1px solid var(--div);border-radius:12px;
+  padding:11px 13px;margin-top:6px}
+.ct-msg-box textarea{background:none;border:none;outline:none;color:var(--tx);
+  font-size:12px;width:100%;resize:none;font-family:inherit}
+
+.ct-req-card{background:var(--s1);border:1px solid var(--div);border-radius:14px;
+  padding:14px;margin-bottom:12px}
+.ct-req-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ct-req-name{font-size:13px;font-weight:800;color:var(--tx)}
+.ct-req-sub{font-size:10px;color:var(--tx3)}
+.ct-req-swap{display:flex;align-items:center;gap:8px;background:var(--s2);
+  border-radius:10px;padding:10px;margin-bottom:10px}
+.ct-req-swap-col{flex:1;text-align:center}
+.ct-req-swap-lbl{font-size:9px;color:var(--tx3);text-transform:uppercase;font-weight:800}
+.ct-req-swap-day{font-size:13px;font-weight:800;margin-top:3px;color:var(--tx)}
+.ct-req-swap-turno{font-size:10px;color:var(--tx2);margin-top:2px}
+.ct-req-swap-arr{color:#93c5fd;font-size:16px}
+.ct-req-msg{font-size:11px;color:var(--tx2);font-style:italic;margin-bottom:10px;
+  padding:8px 10px;background:var(--s2);border-radius:8px}
+.ct-req-actions{display:flex;gap:8px}
+.ct-btn-reject{flex:1;padding:10px;background:rgba(220,38,38,.12);border:1px solid var(--red);
+  border-radius:10px;color:var(--red2);font-weight:700;font-size:12px;text-align:center;cursor:pointer}
+.ct-btn-accept{flex:1;padding:10px;background:var(--green);border:none;border-radius:10px;
+  color:#fff;font-weight:800;font-size:12px;text-align:center;cursor:pointer}
+
+.ct-status-chip{display:inline-block;font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:20px}
+.ct-status-pend{background:rgba(249,115,22,.15);color:var(--nar2)}
+.ct-status-ok{background:rgba(22,163,74,.15);color:var(--green2)}
+.ct-status-no{background:rgba(220,38,38,.15);color:var(--red2)}
+.ct-cancel-btn{margin-top:8px;padding:8px;background:var(--s2);border-radius:10px;
+  color:var(--tx3);font-weight:700;font-size:11px;text-align:center;cursor:pointer}
+.ct-next-step-btn{margin-top:8px;padding:9px;background:rgba(37,99,235,.12);
+  border:1px solid var(--acc);border-radius:10px;color:#93c5fd;font-weight:700;
+  font-size:11.5px;text-align:center;cursor:pointer}
+
+.ct-mail-prompt{background:rgba(37,99,235,.1);border:1.5px solid var(--acc);border-radius:14px;
+  padding:16px;text-align:center;margin-bottom:14px}
+.ct-mail-prompt-ico{font-size:28px;margin-bottom:8px}
+.ct-mail-prompt-tit{font-size:13px;font-weight:800;margin-bottom:4px;color:var(--tx)}
+.ct-mail-prompt-sub{font-size:10.5px;color:var(--tx3);margin-bottom:12px}
+.ct-mail-btn{display:block;width:100%;padding:12px;background:var(--acc);border-radius:10px;
+  color:#fff;font-weight:800;font-size:12.5px;text-decoration:none;box-sizing:border-box;text-align:center}
+
+.ct-confirm-box{background:rgba(22,163,74,.08);border:1.5px solid var(--green);border-radius:14px;
+  padding:14px;text-align:center}
+.ct-confirm-box-tit{font-size:12.5px;font-weight:800;color:var(--green2);margin-bottom:4px}
+.ct-confirm-box-sub{font-size:10.5px;color:var(--tx3);margin-bottom:10px}
+.ct-confirm-btn{width:100%;padding:11px;background:var(--green);border-radius:10px;
+  color:#fff;font-weight:800;font-size:12px;cursor:pointer}
+.ct-send-btn{width:100%;padding:13px;background:var(--acc);border:none;border-radius:12px;
+  color:#fff;font-weight:800;font-size:13px;text-align:center;cursor:pointer;box-sizing:border-box}
+
+.aj-acc-hdr{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px 16px;
+  cursor:pointer;
+  user-select:none;
+  transition:background .15s;
+}
+.aj-acc-hdr:active{
+  background:var(--s2);
+}
+.aj-acc-hdr-ico{
+  font-size:19px;
+  flex-shrink:0;
+}
+.aj-acc-hdr-tit{
+  flex:1;
+  font-size:13px;
+  font-weight:700;
+  color:var(--tx);
+}
+.aj-acc-hdr-arr{
+  font-size:16px;
+  color:var(--tx3);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+  flex-shrink:0;
+}
+.aj-acc-item.aj-acc-open .aj-acc-hdr-arr{
+  transform:rotate(90deg);
+  color:var(--acc);
+}
+.aj-acc-body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .32s cubic-bezier(.4,0,.2,1);
+}
+.aj-acc-item.aj-acc-open .aj-acc-body{
+  max-height:2000px;
+}
+/* La tarjeta original (.aj-card) pierde su propio margen/sombra exterior
+   porque ahora vive dentro del acordeón — su contenido interno NO se toca */
+.aj-acc-body .aj-card{
+  border:none;
+  border-radius:0;
+  box-shadow:none;
+  margin:0;
+  background:transparent;
+}
+.aj-acc-body .aj-card-hdr{
+  display:none; /* el header propio de la tarjeta se oculta — el acordeón ya muestra título e icono */
+}
+

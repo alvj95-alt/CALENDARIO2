@@ -1,0 +1,170 @@
+/* TrenTurnos v5 — Alarmas, firma, footer legal, acordeón de ajustes. Separado del <style> único original (orden de carga = orden del cascade, ver index.html). */
+/* ── MÓDULO ALARMAS — CSS ─────────────────────────── */
+.c-amber .aj-card-hdr-ico,.c-amber .aj-card-hdr-tit{color:var(--amber2);}
+.alarm-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--div);
+}
+.alarm-row:last-child{border-bottom:none;}
+.alarm-main-row{padding:12px 0;}
+.alarm-sub-row{padding:8px 0 8px 10px;opacity:.6;pointer-events:none;}
+.alarm-sw-active .alarm-sub-row{opacity:1;pointer-events:auto;}
+.alarm-title{font-size:12px;font-weight:700;color:var(--tx);}
+.alarm-sub{font-size:10px;color:var(--tx3);margin-top:2px;}
+/* Toggle switch */
+.alarm-toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;}
+.alarm-toggle input{opacity:0;width:0;height:0;}
+.alarm-slider{
+  position:absolute;inset:0;background:var(--div);
+  border-radius:24px;transition:background .2s;cursor:pointer;
+}
+.alarm-slider:before{
+  content:'';position:absolute;width:18px;height:18px;
+  left:3px;top:3px;background:#fff;border-radius:50%;
+  transition:transform .2s;
+}
+.alarm-toggle input:checked + .alarm-slider{background:var(--amber2);}
+.alarm-toggle input:checked + .alarm-slider:before{transform:translateX(20px);}
+.alarm-toggle-sm{width:36px;height:20px;}
+.alarm-toggle-sm .alarm-slider:before{width:14px;height:14px;}
+.alarm-toggle-sm input:checked + .alarm-slider:before{transform:translateX(16px);}
+/* ─────────────────────────────────────────────────── */
+
+.alarm-test-btn{
+  width:100%;padding:11px;
+  background:rgba(245,158,11,.12);
+  border:1.5px solid rgba(245,158,11,.4);
+  border-radius:10px;
+  color:var(--amber2);
+  font-size:13px;font-weight:800;
+  cursor:pointer;
+  transition:transform .1s, background .15s;
+}
+.alarm-test-btn:active{transform:scale(.97);background:rgba(245,158,11,.22);}
+
+/* ── MÓDULO ALARMA PERSISTENTE — CSS ── */
+@keyframes alarmPulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.25);}
+}
+/* Botón stop ya tiene estilos inline; esto añade hover/active */
+#alarma-stop-btn:active{transform:translateX(-50%) scale(.97) !important;}
+/* ─────────────────────────────────────── */
+
+/* ── FIRMA DISCRETA EN STATUS BAR ── */
+.sb-firma{
+  font-size:9px;
+  font-weight:400;
+  letter-spacing:.5px;
+  color:var(--tx3);
+  opacity:.55;
+  font-style:italic;
+}
+/* ── BOTÓN PARADA DE ALARMA (header) ── */
+.hbtn-stop-alarma{
+  background:rgba(220,38,38,.15) !important;
+  color:#f87171 !important;
+  animation:hbtnAlarmPulse 0.9s infinite;
+}
+@keyframes hbtnAlarmPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.45);}
+  50%{box-shadow:0 0 0 6px rgba(220,38,38,0);}
+}
+
+/* ── FOOTER EXTENDIDO AJUSTES (autoría + legal) ── */
+.aj-footer-ext{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--div);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+.aj-footer-autor{
+  font-size:11px;
+  color:var(--tx2);
+}
+.aj-footer-autor strong{
+  color:var(--acc2);
+  font-weight:700;
+}
+.aj-footer-legal{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:10px;
+}
+.aj-footer-link{
+  color:var(--tx3);
+  text-decoration:underline;
+  text-decoration-color:rgba(148,163,184,.35);
+  text-underline-offset:2px;
+  cursor:pointer;
+  transition:color .15s;
+}
+.aj-footer-link:active{color:var(--acc2);}
+.aj-footer-dot{color:var(--tx3);opacity:.4;}
+.aj-footer-meta{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  background:var(--s2);
+  border:1px solid var(--div);
+  border-radius:10px;
+  padding:10px 13px;
+}
+.aj-footer-meta-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:9.5px;
+}
+.aj-footer-meta-row span:first-child{
+  color:var(--tx3);
+  font-weight:700;
+  letter-spacing:.3px;
+}
+.aj-footer-meta-row span:last-child{
+  color:var(--tx2);
+  text-align:right;
+}
+.aj-footer-copy{
+  font-size:8.5px;
+  color:var(--tx3);
+  opacity:.6;
+  margin-top:2px;
+}
+
+/* ── MODALES LEGALES ── */
+.legal-sh{
+  max-height:75vh;
+  display:flex;
+  flex-direction:column;
+}
+.legal-body{
+  padding:6px 18px 24px;
+  overflow-y:auto;
+  font-size:12px;
+  line-height:1.65;
+  color:var(--tx2);
+}
+.legal-body p{
+  margin-bottom:12px;
+}
+.legal-body p:last-child{
+  margin-bottom:0;
+}
+
+/* ── ACORDEÓN AJUSTES ── */
+.aj-acc-item{
+  border-radius:16px;
+  overflow:hidden;
+  margin-bottom:10px;
+  background:var(--s1);
+  border:1px solid var(--div);
+  transition:border-color .2s;
+}
+.aj-acc-item.aj-acc-open{
+  border-color:rgba(99,102,241,.35);
+}

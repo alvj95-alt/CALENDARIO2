@@ -1,0 +1,479 @@
+/* TrenTurnos v5 — Pestaña Compañeros, selector de base, panel admin, buscador, calendario ferroviario, timeline. Separado del <style> único original (orden de carga = orden del cascade, ver index.html). */
+/* ══════════ APP TURNO · PESTAÑA COMPAÑEROS (antes módulo emergente) ══════════ */
+#p-companeros .at-shell{width:100%;height:100%;background:transparent;display:flex;flex-direction:column;overflow:hidden}
+
+
+.at-hdr{padding:16px 18px 14px;border-bottom:1px solid var(--div);flex-shrink:0}
+.at-hdr-top{display:flex;align-items:center;justify-content:space-between}
+.at-hdr-titulo{font-size:20px;font-weight:900;letter-spacing:-.5px}
+.at-hdr-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:800;letter-spacing:.8px;margin-top:5px}
+.at-pill-t{background:rgba(37,99,235,.15);color:var(--acc2);border:1px solid rgba(37,99,235,.3)}
+.at-pill-a{background:rgba(249,115,22,.15);color:var(--nar2);border:1px solid rgba(249,115,22,.3)}
+.at-hdr-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+.at-hdr-btns{display:flex;gap:5px}
+.at-hbtn{width:34px;height:34px;border-radius:9px;background:var(--s2);border:none;color:var(--tx2);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .18s}
+.at-hbtn:hover{background:var(--acc);color:#fff}
+
+.at-body{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;min-height:0}
+.at-body::-webkit-scrollbar{display:none}
+
+.at-panel{display:none;flex-direction:column}
+.at-panel.on{display:flex}
+
+/* ── SELECTOR DE BASE ── */
+.sel-wrap{padding:26px 18px 20px;display:flex;flex-direction:column;gap:14px}
+.sel-intro{text-align:center;padding:8px 6px 4px}
+.sel-ico{font-size:34px;margin-bottom:8px}
+.sel-tit{font-size:17px;font-weight:800}
+.sel-sub{font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.5}
+
+.base-card{display:flex;align-items:center;gap:13px;padding:14px 15px;
+           background:var(--s1);border-radius:16px;border:1px solid var(--div);
+           box-shadow:var(--sh-card);cursor:pointer;transition:all .16s;user-select:none}
+.base-card:hover{border-color:var(--acc2)}
+.base-card:active{transform:scale(.98)}
+.base-ico{width:44px;height:44px;border-radius:13px;flex-shrink:0;
+          display:flex;align-items:center;justify-content:center;font-size:20px}
+.base-ico.b-bcn{background:rgba(37,99,235,.15);color:var(--acc2)}
+.base-ico.b-mad{background:rgba(249,115,22,.15);color:var(--nar2)}
+.base-ico.b-new{background:rgba(148,163,184,.12);color:var(--tx2)}
+.base-info{flex:1;min-width:0}
+.base-name{font-size:14px;font-weight:800}
+.base-meta{font-size:11px;color:var(--tx3);margin-top:2px}
+.base-badge{font-size:9px;font-weight:800;letter-spacing:.4px;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.badge-ok{background:rgba(22,163,74,.15);color:var(--green2);border:1px solid rgba(22,163,74,.3)}
+.badge-pend{background:rgba(249,115,22,.15);color:var(--nar2);border:1px solid rgba(249,115,22,.3)}
+.base-del-btn{background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.3);color:var(--red2);
+              font-size:13px;width:28px;height:28px;border-radius:9px;flex-shrink:0;cursor:pointer;
+              display:flex;align-items:center;justify-content:center;transition:all .15s}
+.base-del-btn:hover{background:rgba(220,38,38,.22);border-color:var(--red)}
+.base-arr{color:var(--tx3);font-size:16px;flex-shrink:0}
+
+.upload-form{background:var(--s2);border:1px solid var(--div);border-radius:14px;padding:14px;margin-top:2px;
+             display:none;flex-direction:column;gap:9px;animation:fadeUp .18s ease}
+.upload-form.on{display:flex}
+.upload-form label{font-size:10px;font-weight:700;color:var(--tx2);letter-spacing:.4px;text-transform:uppercase}
+.upload-form input[type=text]{background:var(--s1);border:1px solid var(--div);border-radius:9px;
+             color:var(--tx);font-size:13px;padding:10px 12px;outline:none}
+.upload-form input[type=text]:focus{border-color:var(--acc2)}
+.filepick{background:var(--s1);border:1.5px dashed var(--div);border-radius:10px;padding:16px 12px;
+          text-align:center;cursor:pointer;transition:border-color .16s}
+.filepick:hover{border-color:var(--acc2)}
+
+/* ═══════════════════════════════════════════════════════════
+   NUEVO — Panel de Administrador (horario y gráfico globales).
+   Reutiliza .sh/.sh-hdr/.sh-ico/.sh-tit/.sh-sub/.sh-close/.filepick/
+   .m-save ya existentes — solo se añaden las clases específicas de
+   este módulo que no existían antes.
+═══════════════════════════════════════════════════════════ */
+#hbtn-admin.es-admin{color:var(--amber2);border-color:var(--amber2)}
+.field-lbl{font-size:9px;font-weight:800;letter-spacing:1px;color:var(--tx3);
+  text-transform:uppercase;margin-bottom:6px;display:block}
+.field-inp{width:100%;background:var(--s2);border:1.5px solid var(--div);border-radius:11px;
+  color:var(--tx);font-size:14px;padding:12px 14px;outline:none;margin-bottom:14px}
+.field-inp:focus{border-color:var(--acc2)}
+.msg-info{font-size:11px;color:var(--tx2);line-height:1.5;margin-top:12px;text-align:center}
+.msg-error{font-size:11px;color:var(--red2);line-height:1.5;margin-top:10px;
+  background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.3);border-radius:9px;padding:9px 11px}
+.msg-ok{font-size:11px;color:var(--green2);line-height:1.5;margin-top:10px;
+  background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.3);border-radius:9px;padding:9px 11px}
+.admin-card{background:var(--s1);border:1px solid var(--div);border-radius:16px;
+  padding:16px;margin:12px 16px;box-shadow:var(--sh-card)}
+.admin-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.admin-card-ico{width:38px;height:38px;border-radius:11px;background:rgba(245,158,11,.15);
+  color:var(--amber2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.admin-card-ico.blue{background:rgba(37,99,235,.15);color:var(--acc3)}
+.admin-card-tit{font-size:14px;font-weight:800}
+.admin-card-sub{font-size:10.5px;color:var(--tx2);margin-top:2px;line-height:1.4}
+.estado-archivo{font-size:11px;color:var(--tx2);background:var(--s2);border:1px solid var(--div);
+  border-radius:9px;padding:9px 11px;margin-top:10px;line-height:1.5}
+.estado-archivo b{color:var(--acc3)}
+.estado-archivo.sin-archivo{color:var(--tx3);font-style:italic}
+.filepick .fp-ico{font-size:20px;margin-bottom:4px}
+.filepick .fp-txt{font-size:11px;color:var(--tx2)}
+.filepick .fp-name{font-size:11px;color:var(--acc3);margin-top:5px;font-weight:600}
+
+/* ═══ NUEVO — Notificaciones del Admin a todos los trabajadores ═══
+   Confirmado por Alex tras revisar la maqueta. 100% aditivo: clases
+   nuevas con prefijo "nadm-" para no colisionar con nada existente. */
+.nadm-banner{border-radius:14px;padding:12px 13px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;
+  cursor:pointer;border:1px solid var(--nadm-bc,rgba(37,99,235,.35));background:var(--nadm-bg,rgba(37,99,235,.1))}
+.nadm-banner-ico{font-size:17px;flex-shrink:0;margin-top:1px}
+.nadm-banner-tit{font-size:12px;font-weight:800;color:var(--nadm-tc,var(--acc3))}
+.nadm-banner-msg{font-size:11px;color:var(--tx2);margin-top:2px;line-height:1.4}
+.nadm-banner-meta{font-size:9px;color:var(--tx3);margin-top:4px;font-weight:700;letter-spacing:.3px}
+.nadm-banner-x{color:var(--tx3);font-size:14px;padding:2px 4px;flex-shrink:0}
+.nadm-modal-ico{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;margin:6px auto 12px;background:var(--nadm-bg,rgba(37,99,235,.15))}
+.nadm-modal-tit{font-size:16px;font-weight:800;text-align:center;padding:0 22px}
+.nadm-modal-meta{font-size:10px;color:var(--tx3);text-align:center;margin-top:5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.nadm-modal-msg{font-size:13px;color:var(--tx2);line-height:1.6;text-align:center;padding:16px 24px 4px}
+.nadm-modal-btn{margin:18px 20px 0;border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:800;
+  height:46px;cursor:pointer;display:block;width:calc(100% - 40px);background:var(--nadm-boton,var(--acc))}
+.nadm-seg{display:flex;gap:6px;background:var(--s2);border:1px solid var(--div);border-radius:11px;padding:4px}
+.nadm-seg-btn{flex:1;text-align:center;padding:9px 4px;border-radius:8px;font-size:11.5px;font-weight:700;
+  color:var(--tx2);cursor:pointer;transition:.15s}
+.nadm-seg-btn.on{background:var(--acc);color:#fff}
+.nadm-sede-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.nadm-sede-chip{padding:7px 12px;border-radius:999px;border:1.5px solid var(--div);background:var(--s2);
+  font-size:11px;font-weight:700;color:var(--tx2);cursor:pointer;transition:.15s}
+.nadm-sede-chip.on{background:rgba(37,99,235,.15);border-color:var(--acc2);color:var(--acc3)}
+.nadm-tipo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.nadm-tipo-chip{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:12px;
+  border:1.5px solid var(--div);background:var(--s2);cursor:pointer;transition:.15s;text-align:center}
+.nadm-tipo-chip .ic{font-size:19px}
+.nadm-tipo-chip .lb{font-size:10.5px;font-weight:700;color:var(--tx2);line-height:1.25}
+.nadm-tipo-chip.on{border-color:var(--chip-c,var(--acc));background:var(--chip-bg,rgba(37,99,235,.12))}
+.nadm-tipo-chip.on .lb{color:var(--chip-c,var(--acc3))}
+.nadm-hist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--div)}
+.nadm-hist-item:last-child{border-bottom:none}
+.nadm-hist-tit{font-size:12px;font-weight:800}
+.nadm-hist-msg{font-size:11px;color:var(--tx2);margin-top:2px;line-height:1.4}
+.nadm-hist-meta{font-size:9.5px;color:var(--tx3);margin-top:4px;font-weight:700;letter-spacing:.3px}
+.nadm-hist-del{background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.3);color:var(--red2);
+  border-radius:8px;padding:5px 9px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0}
+
+/* ═══ NUEVO — Selector de mes del Horario General (Buscador) +
+   Historial por sede/mes (Panel de Admin). Confirmado por Alex tras
+   revisar la maqueta. Prefijo "hg-" para no colisionar con nada. ═══ */
+.hg-mes-sel-lbl{font-size:9.5px;font-weight:800;letter-spacing:.8px;color:var(--tx3);
+  text-transform:uppercase;margin:14px 16px 8px}
+.hg-mes-sel-row{display:flex;gap:8px;padding:0 16px 4px;overflow-x:auto}
+.hg-mes-chip{flex-shrink:0;padding:10px 16px;border-radius:12px;border:1.5px solid var(--div);background:var(--s1);
+  cursor:pointer;transition:.15s;text-align:center;min-width:78px}
+.hg-mes-chip-mes{font-size:12.5px;font-weight:800;color:var(--tx2)}
+.hg-mes-chip-anio{font-size:9.5px;color:var(--tx3);margin-top:1px;font-weight:600}
+.hg-mes-chip.on{background:rgba(37,99,235,.14);border-color:var(--acc2)}
+.hg-mes-chip.cargando{opacity:.55;cursor:wait;pointer-events:none}
+.hg-mes-chip.on .hg-mes-chip-mes{color:var(--acc3)}
+.hg-mes-chip.on .hg-mes-chip-anio{color:var(--acc3);opacity:.8}
+.hg-mes-chip-dot{width:5px;height:5px;border-radius:99px;background:var(--green2);display:inline-block;margin-left:4px;vertical-align:middle}
+.hg-mes-buscando{margin:0 16px 14px;background:var(--s2);border:1px solid var(--div);border-radius:11px;
+  padding:9px 12px;font-size:11.5px;color:var(--tx2);text-align:center}
+.hg-mes-buscando b{color:var(--acc3)}
+.hg-grupo{margin-top:14px}
+.hg-grupo:first-child{margin-top:0}
+.hg-grupo-tit{font-size:11.5px;font-weight:800;color:var(--acc3);margin-bottom:8px}
+.hg-hist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--div)}
+.hg-hist-item:last-child{border-bottom:none}
+.hg-hist-mes{font-size:12.5px;font-weight:800;min-width:82px}
+.hg-hist-mes .hg-actual{color:var(--green2);font-size:9px;font-weight:800;margin-left:5px;background:rgba(22,163,74,.15);
+  padding:2px 6px;border-radius:99px}
+.hg-hist-meta{font-size:10px;color:var(--tx3);flex:1}
+
+.upload-btns{display:flex;gap:8px;margin-top:2px}
+.ubtn{flex:1;height:38px;border:none;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer}
+.ubtn-cancel{background:var(--s1);color:var(--tx2);border:1px solid var(--div)}
+.ubtn-go{background:var(--acc);color:#fff}
+.ubtn-go:disabled{opacity:.4;cursor:not-allowed}
+
+.progress-wrap{padding:40px 26px;text-align:center}
+.spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--div);border-top-color:var(--acc2);
+         margin:0 auto 16px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress-txt{font-size:12px;color:var(--tx2);line-height:1.6}
+.progress-bar-wrap{background:var(--s2);border-radius:20px;height:6px;margin-top:14px;overflow:hidden}
+.progress-bar{background:var(--acc2);height:100%;width:0%;transition:width .2s}
+.progress-err{margin-top:14px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.3);
+              border-radius:10px;padding:12px;font-size:11px;color:var(--red2);line-height:1.5}
+
+/* ── SEARCH ── */
+.srch-wrap{padding:14px 16px 6px}
+
+/* ── TABS dentro del buscador ── */
+/* ── ACORDEONES APILADOS (nombre / tren) ── */
+.acc-section{margin:14px 16px 0;background:var(--s1);border:1px solid var(--div);border-radius:14px;
+             overflow:hidden;box-shadow:var(--sh-card)}
+.acc-head{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;user-select:none;
+          transition:background .14s}
+.acc-head:hover{background:var(--s2)}
+.acc-ico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;
+         justify-content:center;font-size:15px;background:rgba(37,99,235,.15);color:var(--acc3)}
+.acc-ico.at-tren{background:rgba(249,115,22,.15);color:var(--nar2)}
+.acc-title{flex:1;font-size:13px;font-weight:800}
+.acc-chev{color:var(--tx3);font-size:12px;transition:transform .22s}
+.acc-section.open .acc-chev{transform:rotate(90deg);color:var(--acc2)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .28s ease}
+.acc-section.open .acc-body{max-height:6000px}
+.acc-body-inner{border-top:1px solid var(--div)}
+/* ── NUEVO — vista de calendario dentro del perfil de un compañero ── */
+.toggle-view{display:flex;background:var(--s2);border-radius:10px;padding:3px;margin-bottom:14px}
+.toggle-view button{flex:1;padding:7px;border:none;background:none;color:var(--tx2);font-size:11px;font-weight:700;
+  border-radius:8px;cursor:pointer;font-family:inherit}
+.toggle-view button.on{background:var(--acc);color:#fff}
+.p-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.p-cal-nav-lbl{font-size:13px;font-weight:800}
+.p-cal-wd{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:5px}
+.p-cal-wd span{font-size:9px;color:var(--tx3);text-align:center;font-weight:700}
+.p-cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.dc-code{font-size:7px;opacity:.85;margin-top:1px;max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-cal-legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px;font-size:9px;color:var(--tx2)}
+.p-cal-legend span{display:inline-flex;align-items:center;gap:4px}
+.p-cal-legend .dot{width:7px;height:7px;border-radius:50%}
+.p-day-detail{margin-top:10px;background:var(--s2);border:1px solid var(--div);border-radius:12px;padding:11px 12px}
+.p-day-detail-hdr{font-size:10px;font-weight:800;color:var(--acc3);letter-spacing:.2px;margin-bottom:3px;text-transform:uppercase}
+.p-day-detail-val{font-size:13px;font-weight:700}
+/* NUEVO — Guía de Cuentas: <details>/<summary> nativos, el propio
+   navegador controla abrir/cerrar (sin JS nuestro de por medio, así
+   que no puede quedarse "colgado" por ningún fallo de script). Misma
+   estética que el resto de acordeones de la app. */
+.gc-det{margin:14px 16px 0;background:var(--s1);border:1px solid var(--div);border-radius:14px;
+        overflow:hidden;box-shadow:var(--sh-card)}
+.gc-sum{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;user-select:none;
+        list-style:none}
+.gc-sum::-webkit-details-marker{display:none}
+.gc-sum::marker{content:''}
+.gc-sum:hover{background:var(--s2)}
+.gc-ico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;
+        justify-content:center;font-size:15px;background:rgba(37,99,235,.15);color:var(--acc3)}
+.gc-tit{flex:1;font-size:13px;font-weight:800}
+.gc-chev{color:var(--tx3);font-size:12px;transition:transform .22s}
+.gc-det[open] .gc-chev{transform:rotate(90deg);color:var(--acc2)}
+.gc-body{padding:0 15px 14px;font-size:12px;color:var(--tx2);line-height:1.6}
+
+/* ═══════════════════════════════════════════════════════════
+   CALENDARIO FERROVIARIO — selector de fecha 100% propio, sin
+   input nativo. Exclusivo del Comparador de Compañero (búsqueda
+   por tren): se renderiza siempre visible, sin lógica de acordeón
+   ni disparador — el calendario forma parte fija de esta vista.
+   Las animaciones de selección de día usan solo transform/opacity
+   (además de la línea de "vías", que anima background-position de
+   un gradiente ya compuesto) — propiedades que el navegador anima
+   en la capa de composición, sin recalcular layout/paint en cada
+   frame, así que el coste de batería es mínimo.
+═══════════════════════════════════════════════════════════ */
+.cal-tren-panel{margin-bottom:10px}
+
+.cal-tren-box{background:var(--s2);border:1.5px solid var(--div);border-radius:14px;
+  padding:12px;position:relative;overflow:hidden}
+
+/* Línea de "vías" recorriendo el borde superior — puro adorno ferroviario */
+.cal-tren-rail{position:absolute;top:0;left:0;right:0;height:2px;
+  background:repeating-linear-gradient(90deg, var(--acc2) 0 8px, transparent 8px 16px);
+  background-size:32px 2px;animation:cal-tren-vias 1.1s linear infinite}
+@keyframes cal-tren-vias{from{background-position:0 0}to{background-position:32px 0}}
+
+.cal-tren-hdr{display:flex;align-items:center;justify-content:space-between;
+  margin:4px 0 10px}
+.cal-tren-mes{font-size:13px;font-weight:800;color:var(--tx)}
+.cal-tren-nav{background:var(--s1);border:1px solid var(--div);border-radius:8px;
+  color:var(--tx2);font-size:15px;width:28px;height:28px;cursor:pointer;
+  transition:border-color .15s}
+.cal-tren-nav:hover{border-color:var(--acc2);color:var(--acc2)}
+
+.cal-tren-semana{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.cal-tren-dsem{text-align:center;font-size:9px;font-weight:800;color:var(--tx3);
+  letter-spacing:.3px;padding:4px 0}
+
+.cal-tren-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-tren-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:10px;font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer;
+  background:var(--s1);border:1px solid transparent;transition:all .15s;position:relative}
+.cal-tren-day:hover{border-color:var(--acc2);color:var(--tx)}
+.cal-tren-vacio{background:none;cursor:default;pointer-events:none}
+.cal-tren-hoy{border-color:var(--amber2);color:var(--amber2)}
+.cal-tren-sel{background:var(--acc);border-color:var(--acc);color:#fff;
+  box-shadow:0 0 0 3px rgba(37,99,235,.25)}
+
+/* Animación de pulso/luz al seleccionar un día */
+@keyframes cal-tren-pulso{
+  0%{box-shadow:0 0 0 0 rgba(37,99,235,.55)}
+  70%{box-shadow:0 0 0 10px rgba(37,99,235,0)}
+  100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}
+}
+.cal-tren-pulso{animation:cal-tren-pulso .42s ease-out}
+
+.tr-inputrow{display:flex;gap:8px;padding:10px 16px 4px;align-items:center}
+.tr-go{background:var(--acc);color:#fff;border:none;border-radius:11px;padding:0 18px;
+       font-size:13px;font-weight:800;cursor:pointer;transition:background .16s}
+.tr-go:hover{background:var(--acc2)}
+
+/* ── TREN VISUAL (vagones) ── */
+.train-scene{padding:20px 16px 16px}
+.train-meta{font-size:11px;color:var(--tx3);margin-bottom:12px;padding:0 2px}
+.train-meta b{color:var(--acc3)}
+.train-track{position:relative;overflow-x:auto;overflow-y:hidden;padding:10px 4px 18px;
+             scrollbar-width:none}
+.train-track::-webkit-scrollbar{display:none}
+/* NUEVO — clase exclusiva para el contenedor de resultados del
+   comparador de compañeros. Antes reutilizaba ".train-track", el
+   mismo nombre que ya usa el mini-tren animado de la barra de estado
+   (arriba, línea ~82: width:56px;height:15px;pointer-events:none).
+   Como esas propiedades nunca se redeclaraban aquí, se "colaban" por
+   cascada CSS y comprimían los vagones con nombres a una franja de
+   15px sin interacción — por eso solo se veía el contador de arriba
+   y nunca los nombres. Esta clase nueva define TODAS las propiedades
+   necesarias, sin depender de ninguna otra regla. */
+.train-track-resultados{position:relative;overflow-x:auto;overflow-y:hidden;
+             padding:10px 4px 18px;scrollbar-width:none;
+             width:auto;height:auto;flex-shrink:initial;pointer-events:auto}
+.train-track-resultados::-webkit-scrollbar{display:none}
+.train-rail{display:flex;align-items:flex-end;gap:0;min-width:min-content}
+
+.loco{flex-shrink:0;width:58px;height:74px;background:linear-gradient(160deg,var(--acc) 0%,#1d4ed8 100%);
+      border-radius:14px 8px 8px 14px;position:relative;box-shadow:0 6px 18px rgba(37,99,235,.4);
+      display:flex;align-items:center;justify-content:center;font-size:22px;
+      opacity:0;transform:translateX(-14px);animation:wagonIn .38s ease forwards}
+.loco::after{content:'';position:absolute;bottom:-7px;left:10px;right:10px;height:7px;
+             background:var(--s3);border-radius:0 0 6px 6px}
+
+.coupler{flex-shrink:0;width:10px;height:5px;background:var(--tx3);margin-bottom:26px;
+         opacity:0;animation:wagonIn .3s ease forwards}
+
+.wagon{flex-shrink:0;width:112px;min-height:74px;background:var(--s1);border:1.5px solid var(--div);
+       border-radius:10px;margin-bottom:0;position:relative;
+       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+       padding:10px 8px;box-shadow:var(--sh-card);
+       opacity:0;transform:translateX(-14px) scale(.94);animation:wagonIn .4s ease forwards}
+.wagon::before{content:'';position:absolute;top:0;left:8px;right:8px;height:5px;
+               background:var(--acc2);border-radius:0 0 4px 4px}
+.wagon::after{content:'';position:absolute;bottom:-7px;left:10px;right:10px;height:7px;
+             background:var(--s3);border-radius:0 0 6px 6px}
+.wagon .w-av{width:28px;height:28px;border-radius:9px;background:rgba(37,99,235,.18);
+             color:var(--acc3);display:flex;align-items:center;justify-content:center;
+             font-size:11px;font-weight:800}
+.wagon .w-name{font-size:10px;font-weight:700;text-align:center;line-height:1.25;
+               overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
+               -webkit-line-clamp:2;-webkit-box-orient:vertical}
+.wagon .w-id{font-size:8px;color:var(--tx3);font-variant-numeric:tabular-nums}
+
+@keyframes wagonIn{
+  from{opacity:0;transform:translateX(-14px) scale(.94)}
+  to{opacity:1;transform:translateX(0) scale(1)}
+}
+
+.train-empty{background:var(--s2);border:1px solid var(--div);border-radius:14px;
+             padding:24px 18px;text-align:center;font-size:12px;color:var(--tx3);
+             line-height:1.6;animation:fadeUp .2s ease}
+.train-empty b{color:var(--tx2)}
+.srch{background:var(--s2);border-radius:12px;padding:11px 14px;
+      display:flex;align-items:center;gap:9px;border:1px solid var(--div);
+      transition:border-color .16s}
+.srch:focus-within{border-color:var(--acc2)}
+.srch-ico{font-size:15px;color:var(--tx2);flex-shrink:0}
+.srch input{background:none;border:none;color:var(--tx);font-size:14px;outline:none;flex:1;font-weight:500}
+.srch input::placeholder{color:var(--tx3)}
+.srch-clear{background:none;border:none;color:var(--tx3);font-size:15px;cursor:pointer;padding:2px 4px;display:none}
+
+.hint-empty{text-align:center;color:var(--tx3);font-size:12px;padding:40px 26px;line-height:1.6}
+.hint-empty b{color:var(--tx2)}
+
+/* ── RESULT LIST (contact-style) ── */
+.list{padding:6px 16px 16px}
+.list-section-lbl{padding:10px 16px 4px;font-size:9px;font-weight:800;letter-spacing:1px;color:var(--tx3)}
+.pcard{display:flex;align-items:center;gap:11px;padding:12px 13px;
+       background:var(--s2);border-radius:12px;border:1px solid var(--div);
+       margin-bottom:8px;cursor:pointer;transition:all .15s;user-select:none}
+.pcard:active{transform:scale(.98)}
+.pcard:hover{border-color:var(--acc2)}
+.pcard-av{width:38px;height:38px;border-radius:12px;background:rgba(37,99,235,.15);
+          display:flex;align-items:center;justify-content:center;
+          font-size:14px;font-weight:800;color:var(--acc2);flex-shrink:0}
+.pcard-info{flex:1;min-width:0}
+.pcard-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard-id{font-size:10px;color:var(--tx3);margin-top:1px;font-variant-numeric:tabular-nums}
+.pcard-arr{color:var(--tx3);font-size:15px;flex-shrink:0}
+
+/* ── perfil-companero: mismo .pcard, sin recortar el nombre ── */
+.perfil-companero{flex-wrap:wrap}
+.pcard-avatar-img{width:38px;height:38px;border-radius:12px;flex-shrink:0;
+                   background:rgba(37,99,235,.15);object-fit:cover}
+.pcard-name-full{font-size:13px;font-weight:700;white-space:normal;
+                  word-break:break-word;flex:1;min-width:140px}
+
+/* ── Animación de carga de resultados — SOLO dentro de los
+   contenedores de resultados (view/trainView). Puramente visual:
+   si por lo que sea no llega a mostrarse, el propio flujo de
+   renderizado (con try/catch) muestra los datos igualmente. ── */
+.animacion-tren-loader{display:flex;align-items:center;justify-content:center;
+                        height:64px;overflow:hidden}
+.atl-track{display:flex;gap:6px;animation:atl-avanzar .9s linear infinite}
+.atl-car{width:30px;height:18px;border-radius:4px;background:var(--acc2);opacity:.85}
+.atl-car:first-child{width:24px;border-radius:4px 9px 4px 4px;background:var(--amber2)}
+@keyframes atl-avanzar{
+  0%{transform:translateX(-50px)}
+  100%{transform:translateX(50px)}
+}
+
+/* ── PROFILE VIEW (centered, non-grid) ── */
+.profile{padding:8px 16px 20px;animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.p-back{display:inline-flex;align-items:center;gap:5px;background:none;border:none;
+        color:var(--acc2);font-size:12px;font-weight:700;cursor:pointer;padding:6px 0 10px}
+.p-head{display:flex;align-items:center;gap:13px;padding:8px 4px 18px}
+.p-av{width:54px;height:54px;border-radius:16px;background:rgba(37,99,235,.15);
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;font-weight:800;color:var(--acc2);flex-shrink:0}
+.p-name{font-size:17px;font-weight:800;letter-spacing:-.2px;line-height:1.25}
+.p-id{font-size:11px;color:var(--tx3);margin-top:2px;font-variant-numeric:tabular-nums}
+
+.p-legend{display:flex;gap:6px;flex-wrap:wrap;padding:0 4px 16px}
+.p-leg{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--tx2);
+       background:var(--s2);border:1px solid var(--div);border-radius:20px;padding:3px 9px}
+.p-leg .at-dot{width:6px;height:6px;border-radius:50%}
+
+/* ── Resumen de horas del compañero (Totales/EF/PR/Jor.Prorr.) ──
+   Mismos tokens visuales que el resto del perfil (--s2/--div/--tx2/
+   --nar2), para que encaje sin desentonar con p-head/p-legend. */
+.p-stats{display:flex;flex-wrap:wrap;gap:8px;padding:0 4px 16px}
+.p-stat{flex:1;min-width:72px;background:var(--s2);border:1px solid var(--div);
+        border-radius:12px;padding:8px 10px;text-align:center}
+.p-stat-val{font-size:15px;font-weight:800;color:var(--nar2);font-variant-numeric:tabular-nums}
+.p-stat-lbl{font-size:8px;color:var(--tx3);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
+.p-meta{font-size:10px;color:var(--tx3);padding:0 4px 4px}
+
+/* ── TIMELINE VERTICAL (nueva estética de calendario) ── */
+.at-timeline{position:relative;padding:4px 4px 4px 6px}
+.tl-item{position:relative;display:flex;gap:13px;padding-bottom:14px;cursor:pointer}
+.tl-item:last-child{padding-bottom:2px}
+.tl-rail{position:relative;width:34px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+.tl-node{width:34px;height:34px;border-radius:11px;background:var(--s2);border:1.5px solid var(--div);
+         display:flex;flex-direction:column;align-items:center;justify-content:center;
+         flex-shrink:0;z-index:1;transition:all .16s}
+.tl-node .tnum{font-size:12px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.tl-node .twd{font-size:6px;font-weight:700;color:var(--tx3);letter-spacing:.3px;margin-top:1px}
+.tl-line{position:absolute;top:34px;bottom:-14px;width:2px;background:var(--div);z-index:0}
+.tl-item:last-child .tl-line{display:none}
+
+.tl-card{flex:1;min-width:0;background:var(--s2);border:1px solid var(--div);border-radius:12px;
+         padding:10px 13px;transition:all .16s}
+.tl-item:hover .tl-card{border-color:var(--acc2)}
+.tl-item.sel .tl-card{background:rgba(37,99,235,.1);border-color:var(--acc2)}
+.tl-item.sel .tl-node{background:var(--acc);border-color:var(--acc)}
+.tl-item.sel .tl-node .tnum,.tl-item.sel .tl-node .twd{color:#fff}
+.tl-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tl-tag{font-size:8px;font-weight:800;letter-spacing:.4px;padding:2px 7px;border-radius:20px}
+.tl-val{font-size:12px;font-weight:600;line-height:1.4;word-break:break-word;margin-top:4px}
+.tl-item.off .tl-val{color:var(--tx3);font-weight:400}
+.tl-item.off .tl-node{opacity:.55}
+.tl-arr{color:var(--tx3);font-size:11px;flex-shrink:0}
+
+.tag-ord{background:rgba(59,130,246,.15);color:var(--acc3)}
+.tag-des{background:rgba(74,222,128,.15);color:var(--green2)}
+.tag-res{background:rgba(252,211,77,.15);color:var(--amber2)}
+.tag-dop{background:rgba(249,168,212,.15);color:#F9A8D4}
+.tag-oth{background:rgba(148,163,184,.15);color:var(--tx2)}
+
+.comp-wrap{margin-top:14px;animation:fadeUp .2s ease}
+.comp-hdr{display:flex;align-items:baseline;gap:7px;padding:0 4px 9px}
+.comp-hdr .ct{font-size:13px;font-weight:800}
+.comp-hdr .at-cs{font-size:11px;color:var(--tx3)}
+.comp-list .pcard{margin-bottom:7px}
+.comp-cell{font-size:10px;color:var(--acc3);margin-top:2px;font-weight:600}
+.tren-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(249,115,22,.14);
+  border:1px solid rgba(249,115,22,.4);border-radius:8px;padding:3px 9px;margin-top:6px;
+  font-size:12px;font-weight:800;color:var(--nar3);letter-spacing:.2px}
+.tren-badge-num{color:var(--nar2);font-variant-numeric:tabular-nums;font-size:13px}
+.comp-none{background:var(--s2);border:1px solid var(--div);border-radius:12px;
+           padding:16px 14px;text-align:center;font-size:12px;color:var(--tx3);line-height:1.5}
+.comp-none b{color:var(--tx2)}
+
+.at-dot-ord{background:var(--acc2)}
+.at-dot-des{background:var(--green2)}
+.at-dot-res{background:var(--amber2)}
+.at-dot-dop{background:#F9A8D4}
+.at-dot-oth{background:var(--tx3)}
+
+.at-footer{text-align:center;padding:14px 16px 6px;font-size:9px;color:var(--tx3);line-height:1.5;flex-shrink:0}
+
